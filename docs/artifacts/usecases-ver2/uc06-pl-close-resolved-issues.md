@@ -1,7 +1,7 @@
 # Use Case UC6
 
-## Use Case Name
-Close Resolved Issues (resolved 이슈 검색·closed 전환)
+## 유스케이스 이름
+이슈 종료처리
 
 ## Scope
 이슈 관리 시스템
@@ -22,7 +22,7 @@ PL
 - 선택한 이슈가 정책이 허용하면 `closed` 상태로 바뀐다.
 
 ## Main Success Scenario
-1. PL이 `Browse and View Issue Detail`(UC7)를 include하여 `resolved` 상태 이슈를 검색·목록·상세로 확인한다.
+1. PL이 이슈 브라우즈(UC7)를 include하여 `resolved` 상태 이슈를 검색·목록·상세로 확인한다.
 2. PL이 종료할 이슈를 선택하고 상태를 `closed`로 변경한다.
 
 ## Extensions

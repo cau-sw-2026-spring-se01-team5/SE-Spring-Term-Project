@@ -1,7 +1,7 @@
 # Use Case UC10
 
-## Use Case Name
-Trigger Recommendation Learning (추천 학습 수동 실행하기)
+## 유스케이스 이름
+추천 학습 수동 실행
 
 ## Scope
 이슈 관리 시스템
@@ -26,4 +26,4 @@ PL
 
 ## Miscellaneous
 - 요청사항 **extend 2번**에 해당한다.
-- **Recommend Assignee Candidates (UC9)**를 확장한다.
+- **담당자 후보 추천(UC9)**를 확장한다.

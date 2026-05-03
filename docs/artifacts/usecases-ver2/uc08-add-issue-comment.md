@@ -1,7 +1,7 @@
 # Use Case UC8
 
-## Use Case Name
-Add Issue Comment (이슈에 코멘트 추가하기)
+## 유스케이스 이름
+코멘트 추가
 
 ## Scope
 이슈 관리 시스템
@@ -10,7 +10,7 @@ Add Issue Comment (이슈에 코멘트 추가하기)
 subfunction
 
 ## Primary Actor
-Project Member
+User
 
 ## Preconditions
 - 대상 이슈가 존재한다.
@@ -25,4 +25,4 @@ Project Member
 
 ## Miscellaneous
 - 요청사항 **include 2번(코멘트 추가)**에 해당한다.
-- **Register Issue (UC2)**·**Triage and Assign New Issues (UC3)**·**Fix Assigned Issue (UC4)**에서 include된다.
+- **이슈 등록(UC2)**·**이슈 배정(UC3)**·**배정된 이슈 해결(UC4)**에서 include된다.

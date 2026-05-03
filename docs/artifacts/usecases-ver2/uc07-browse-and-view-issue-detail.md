@@ -1,7 +1,7 @@
 # Use Case UC7
 
-## Use Case Name
-Browse and View Issue Detail (이슈 브라우즈·상세 보기)
+## 유스케이스 이름
+이슈 브라우즈
 
 ## Scope
 이슈 관리 시스템
@@ -10,12 +10,12 @@ Browse and View Issue Detail (이슈 브라우즈·상세 보기)
 subfunction
 
 ## Primary Actor
-Project Member (상호작용을 시작한 구성원; PL / Dev / Tester 중 실제 로그인 역할)
+User (PL / dev / tester 중 실제 로그인 역할)
 
 ## Stakeholders and Interests
 - **PL:** 목록·검색으로 이슈를 고르고 내용을 파악하고 싶다.
-- **Dev:** 배정·상태 조건으로 자신의 작업 대상을 좁히고 싶다.
-- **Tester:** 본인이 보고한 이슈의 처리 상황을 보고 싶다.
+- **dev:** 배정·상태 조건으로 자신의 작업 대상을 좁히고 싶다.
+- **tester:** 본인이 보고한 이슈의 처리 상황을 보고 싶다.
 
 ## Preconditions
 - 사용자가 인증되어 있다.
@@ -42,4 +42,4 @@ Project Member (상호작용을 시작한 구성원; PL / Dev / Tester 중 실�
 매우 높음.
 
 ## Miscellaneous
-- **Triage and Assign New Issues (UC3)**, **Fix Assigned Issue (UC4)**, **Verify Fixed Issues and Resolve (UC5)**, **Close Resolved Issues (UC6)**에서 include된다.
+- **이슈 배정(UC3)**, **배정된 이슈 해결(UC4)**, **수정된 이슈 확인(UC5)**, **이슈 종료처리(UC6)**에서 include된다.

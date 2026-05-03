@@ -1,7 +1,7 @@
 # Use Case UC1
 
-## Use Case Name
-Manage Projects and User Accounts (프로젝트·계정 관리하기)
+## 유스케이스 이름
+프로젝트·계정 관리
 
 ## Scope
 이슈 관리 시스템
@@ -13,8 +13,8 @@ user-goal
 Admin
 
 ## Stakeholders and Interests
-- **Admin:** 프로젝트를 만들고 admin/PL/dev/tester 계정을 추가·관리하고 싶다.
-- **PL/Dev/Tester:** 데모·운영에 필요한 계정이 미리 준비되길 원한다.
+- **Admin:** 프로젝트를 만들고 admin / PL / dev / tester 계정을 추가·관리하고 싶다.
+- **PL / dev / tester:** 데모·운영에 필요한 계정이 미리 준비되길 원한다.
 
 ## Preconditions
 - Admin이 인증된 상태다.
@@ -34,4 +34,4 @@ Admin
 1. System이 거절 사유를 알리고 Admin이 식별자를 수정한다.
 
 ## Miscellaneous
-- 예제 시나리오: Admin이 project1을 추가하고 PL/dev/tester 계정을 준비한다.
+- 예제 시나리오: Admin이 project1을 추가하고 PL / dev / tester 계정을 준비한다.
