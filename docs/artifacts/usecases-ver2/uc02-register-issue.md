@@ -28,7 +28,7 @@ Tester
 ## Main Success Scenario
 1. tester가 제목·설명(필수)과 필요한 나머지 필드를 제출한다.
 2. System이 현재 로그인 계정을 reporter로, 등록 시각을 reported date로 반영하고 이슈를 `new` 상태로 저장한다.
-3. (선택) tester가 같은 이슈에 대해 코멘트 추가(UC8)를 include하여 코멘트를 추가한다.
+3. tester가 같은 이슈에 대해 코멘트 추가(UC8)를 include하여 코멘트를 추가한다.
 
 ## Extensions
 *1a. 제목 또는 설명이 비었다.
