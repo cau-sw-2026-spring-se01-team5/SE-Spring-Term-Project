@@ -1,0 +1,73 @@
+<mxfile host="65bd71144e">
+    <diagram id="uc03-ssd" name="UC03 SSD">
+        <mxGraphModel dx="927" dy="777" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1000" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="f" value="" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;" parent="1" vertex="1">
+                    <mxGeometry x="20" y="20" width="1320" height="900" as="geometry"/>
+                </mxCell>
+                <mxCell id="ft" value="sd assignIssueWithComment()" style="shape=mxgraph.flowchart.annotation_2;html=1;strokeWidth=2;" parent="1" vertex="1">
+                    <mxGeometry x="30.5" y="30" width="280" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="a" value="pl:PL" style="rounded=0;html=1;strokeWidth=2;" parent="1" vertex="1">
+                    <mxGeometry x="120" y="100" width="100" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="u" value="ui:IssueAssignView" style="rounded=0;html=1;strokeWidth=2;" parent="1" vertex="1">
+                    <mxGeometry x="420" y="100" width="160" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="c" value="controller:IssueAssignController" style="rounded=0;html=1;strokeWidth=2;" parent="1" vertex="1">
+                    <mxGeometry x="730" y="100" width="230" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="i" value="issue:Issue" style="rounded=0;html=1;strokeWidth=2;" parent="1" vertex="1">
+                    <mxGeometry x="1090" y="100" width="140" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="la" value="" style="shape=line;dashed=1;dashPattern=6 6;" parent="1" vertex="1">
+                    <mxGeometry x="170" y="140" width="1" height="740" as="geometry"/>
+                </mxCell>
+                <mxCell id="lu" value="" style="shape=line;dashed=1;dashPattern=6 6;" parent="1" vertex="1">
+                    <mxGeometry x="500" y="140" width="1" height="740" as="geometry"/>
+                </mxCell>
+                <mxCell id="lc" value="" style="shape=line;dashed=1;dashPattern=6 6;" parent="1" vertex="1">
+                    <mxGeometry x="845" y="140" width="1" height="740" as="geometry"/>
+                </mxCell>
+                <mxCell id="li" value="" style="shape=line;dashed=1;dashPattern=6 6;" parent="1" vertex="1">
+                    <mxGeometry x="1160" y="140" width="1" height="740" as="geometry"/>
+                </mxCell>
+                <mxCell id="m1" value="1: 배정 대상/담당자/코멘트 입력" style="endArrow=block;html=1;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="171" y="200" as="sourcePoint"/>
+                        <mxPoint x="499" y="200" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="m2" value="2: assignIssueWithComment(issueId, assigneeId, commentText)" style="endArrow=block;html=1;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="501" y="250" as="sourcePoint"/>
+                        <mxPoint x="844" y="250" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="loop1" value="loop [배정할 이슈가 남아있는 동안]" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=2;dashed=1;dashPattern=8 4;" parent="1" vertex="1">
+                    <mxGeometry x="360" y="210" width="910" height="170" as="geometry"/>
+                </mxCell>
+                <mxCell id="m3" value="3: applyAssignment(issueId, assigneeId, commentText)" style="endArrow=block;html=1;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="846" y="300" as="sourcePoint"/>
+                        <mxPoint x="1159" y="300" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="r1" value="issueAssigned(issueId, state=assigned)" style="endArrow=open;endFill=0;dashed=1;dashPattern=4 4;html=1;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="844" y="340" as="sourcePoint"/>
+                        <mxPoint x="501" y="300" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="r2" value="배정 결과 표시" style="endArrow=open;endFill=0;dashed=1;dashPattern=4 4;html=1;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="499" y="350" as="sourcePoint"/>
+                        <mxPoint x="171" y="350" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
