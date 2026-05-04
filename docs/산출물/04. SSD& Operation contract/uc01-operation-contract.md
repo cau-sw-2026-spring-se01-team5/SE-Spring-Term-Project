@@ -1,7 +1,9 @@
 # IC1. Operation Contract (UC01 메인 시나리오)
 
 Operation: `manageProjectAndAccounts(projectInfo: ProjectInfo, accountInfos: AccountInfo[])`  
-Cross References: Use Cases: UC01 프로젝트·계정 관리, SSD `manageProjectAndAccounts`  
+
+Cross References: UC01 프로젝트·계정 관리
+
 Preconditions:
 - Admin이 인증된 상태였다.
 - `projectInfo`가 프로젝트 생성에 필요한 필수 항목을 포함하고 있었다.
