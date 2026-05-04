@@ -1,4 +1,4 @@
-# UC02 Operation Contract (메인 시나리오)
+# UC02 Operation Contract (UC02 메인 시나리오)
 
 Operation: `registerIssue(issueData: IssueData, commentText: String)`  
 
