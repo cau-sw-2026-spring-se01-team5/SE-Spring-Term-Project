@@ -26,10 +26,10 @@ PL
 
 ## Main Success Scenario
 1. PL이 이슈 브라우즈(UC7)를 include하여 new 상태 이슈를 검색·목록·상세로 확인한다.
-2. (선택) PL이 담당자 추천이 필요하면 담당자 후보 추천(UC9)을 **extend**로 실행해 후보를 참고한다.
-3. PL이 tester1이 reporter인 이슈 등 대상에 대해 assignee(예: dev1)를 지정한다.
-4. PL이 코멘트 추가(UC8)를 include하여 배정에 맞는 코멘트를 남긴다.
-5. System이 이슈 상태를 `assigned`로 반영한다.
+(extend) PL이 담당자 추천이 필요하면 담당자 후보 추천(UC9)을 **extend**로 실행해 후보를 참고한다.
+2. PL이 tester1이 reporter인 이슈 등 대상에 대해 assignee(예: dev1)를 지정한다.
+3. PL이 코멘트 추가(UC8)를 include하여 배정에 맞는 코멘트를 남긴다.
+4. System이 이슈 상태를 `assigned`로 반영한다.
 
 ## Extensions
 *3a. 전이 또는 권한이 허용되지 않는다.
