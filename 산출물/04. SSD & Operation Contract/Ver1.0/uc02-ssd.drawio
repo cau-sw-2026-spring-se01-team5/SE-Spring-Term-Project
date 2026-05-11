@@ -1,0 +1,86 @@
+<mxfile host="65bd71144e">
+    <diagram id="uc02-ssd" name="UC02 SSD">
+        <mxGraphModel dx="1358" dy="971" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1000" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="la" value="" style="shape=line;dashed=1;dashPattern=6 6;" parent="1" vertex="1">
+                    <mxGeometry x="185" y="140" width="1" height="740" as="geometry"/>
+                </mxCell>
+                <mxCell id="lu" value="" style="shape=line;dashed=1;dashPattern=6 6;" parent="1" vertex="1">
+                    <mxGeometry x="505" y="140" width="1" height="740" as="geometry"/>
+                </mxCell>
+                <mxCell id="lc" value="" style="shape=line;dashed=1;dashPattern=6 6;" parent="1" vertex="1">
+                    <mxGeometry x="835" y="140" width="1" height="740" as="geometry"/>
+                </mxCell>
+                <mxCell id="li" value="" style="shape=line;dashed=1;dashPattern=6 6;" parent="1" vertex="1">
+                    <mxGeometry x="1160" y="140" width="1" height="740" as="geometry"/>
+                </mxCell>
+                <mxCell id="58" value="&lt;span style=&quot;&quot;&gt;:System&lt;/span&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;" parent="1" vertex="1">
+                    <mxGeometry x="344" y="310" width="120" height="500" as="geometry"/>
+                </mxCell>
+                <mxCell id="59" value="" style="endArrow=block;html=1;" parent="58" edge="1" target="58">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-167" y="100" as="sourcePoint"/>
+                        <mxPoint x="56" y="100" as="targetPoint"/>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="63" value="" style="shape=line;dashed=1;dashPattern=6 6;" parent="1" vertex="1">
+                    <mxGeometry x="195" y="350" width="1" height="740" as="geometry"/>
+                </mxCell>
+                <mxCell id="64" value="" style="shape=line;dashed=1;dashPattern=6 6;" parent="1" vertex="1">
+                    <mxGeometry x="525" y="350" width="1" height="740" as="geometry"/>
+                </mxCell>
+                <mxCell id="65" value="" style="shape=line;dashed=1;dashPattern=6 6;" parent="1" vertex="1">
+                    <mxGeometry x="875" y="350" width="1" height="740" as="geometry"/>
+                </mxCell>
+                <mxCell id="69" value="issueCreated(issueId)" style="endArrow=blockThin;endFill=1;html=1;" parent="1" edge="1">
+                    <mxGeometry x="0.0435" y="-10" relative="1" as="geometry">
+                        <mxPoint x="402.5" y="710" as="sourcePoint"/>
+                        <mxPoint x="172.5" y="710" as="targetPoint"/>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="70" value=":Tester" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="160" y="300" width="30" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="71" value="" style="endArrow=none;dashed=1;html=1;strokeWidth=1;entryX=0.2;entryY=0.325;entryDx=0;entryDy=0;entryPerimeter=0;startArrow=none;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="175" y="810" as="sourcePoint"/>
+                        <mxPoint x="174.66000000000008" y="384" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="82" value="&lt;span style=&quot;font-size: 11px;&quot;&gt;requestIssueCreation&lt;/span&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;dashed=1;strokeWidth=0.1;" parent="1" vertex="1">
+                    <mxGeometry x="130" y="383" width="317" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="62" value="&lt;span style=&quot;text-align: center;&quot;&gt;&lt;b&gt;sd&amp;nbsp;&lt;/b&gt;&lt;/span&gt;&lt;b&gt;registerIssue&lt;/b&gt;( title: String, description: String, commentText: String )" style="shape=umlFrame;whiteSpace=wrap;html=1;width=420;height=30;boundedLbl=1;verticalAlign=middle;align=left;spacingLeft=5;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="210" width="460" height="650" as="geometry"/>
+                </mxCell>
+                <mxCell id="85" value="" style="endArrow=block;html=1;" edge="1" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="177" y="479" as="sourcePoint"/>
+                        <mxPoint x="403.5" y="479" as="targetPoint"/>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="86" value="&lt;span style=&quot;font-size: 11px;&quot;&gt;enterDetails(title, description)&lt;/span&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;dashed=1;strokeWidth=0.1;" vertex="1" parent="1">
+                    <mxGeometry x="130" y="454" width="317" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="87" value="" style="endArrow=block;html=1;" edge="1" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="176" y="582.5" as="sourcePoint"/>
+                        <mxPoint x="402.5" y="582.5" as="targetPoint"/>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="88" value="&lt;span style=&quot;font-size: 11px;&quot;&gt;addComment(comment)&lt;/span&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;dashed=1;strokeWidth=0.1;" vertex="1" parent="1">
+                    <mxGeometry x="129" y="548.5" width="317" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="89" value="&lt;span style=&quot;text-align: center;&quot;&gt;&lt;b&gt;opt&lt;/b&gt;&amp;nbsp;&lt;/span&gt;[코멘트를 입력한 경우]" style="shape=umlFrame;whiteSpace=wrap;html=1;width=156;height=25;boundedLbl=1;verticalAlign=middle;align=left;spacingLeft=5;strokeColor=#000000;strokeWidth=1;fillColor=default;" vertex="1" parent="1">
+                    <mxGeometry x="114" y="515" width="350" height="130" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
