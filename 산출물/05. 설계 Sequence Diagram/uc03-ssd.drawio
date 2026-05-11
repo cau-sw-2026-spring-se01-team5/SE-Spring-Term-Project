@@ -1,9 +1,12 @@
 <mxfile host="65bd71144e">
     <diagram id="uc03-ssd" name="UC03 SSD">
-        <mxGraphModel dx="704" dy="1080" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1000" math="0" shadow="0">
+        <mxGraphModel dx="846" dy="777" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1000" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
+                <mxCell id="28" value="&lt;span style=&quot;text-align: center;&quot;&gt;&lt;b&gt;sd&amp;nbsp;&lt;/b&gt;&lt;/span&gt;&lt;b&gt;assignIssue&lt;/b&gt;( issueId: ID )" style="shape=umlFrame;whiteSpace=wrap;html=1;width=190;height=30;boundedLbl=1;verticalAlign=middle;align=left;spacingLeft=5;" parent="1" vertex="1">
+                    <mxGeometry x="100" y="90" width="1080" height="770" as="geometry"/>
+                </mxCell>
                 <mxCell id="la" value="" style="shape=line;dashed=1;dashPattern=6 6;" parent="1" vertex="1">
                     <mxGeometry x="170" y="140" width="1" height="740" as="geometry"/>
                 </mxCell>
@@ -106,7 +109,7 @@
                         <mxPoint as="offset"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="96" value="" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;strokeWidth=1;fillColor=default;" vertex="1" parent="17">
+                <mxCell id="96" value="" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;strokeWidth=1;fillColor=default;" parent="17" vertex="1">
                     <mxGeometry x="63" y="296" width="15" height="29" as="geometry"/>
                 </mxCell>
                 <mxCell id="23" value="&lt;span style=&quot;&quot;&gt;:Issue&lt;/span&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;" parent="1" vertex="1">
@@ -121,7 +124,7 @@
                 <mxCell id="94" value="" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;strokeWidth=1;fillColor=default;" parent="93" vertex="1">
                     <mxGeometry x="82.5" y="240" width="15" height="29" as="geometry"/>
                 </mxCell>
-                <mxCell id="92" value="4. returnCandidates(assigeeID[ ] )" style="endArrow=open;endFill=0;html=1;" parent="93" edge="1">
+                <mxCell id="92" value="4. returnCandidates(assigeeID[ ] )" style="endArrow=block;endFill=1;html=1;" parent="93" edge="1">
                     <mxGeometry x="-0.0526" y="-10" relative="1" as="geometry">
                         <mxPoint x="89" y="300" as="sourcePoint"/>
                         <mxPoint x="-120" y="300" as="targetPoint"/>
@@ -129,7 +132,7 @@
                     </mxGeometry>
                 </mxCell>
                 <mxCell id="90" value="&lt;span style=&quot;&quot;&gt;&lt;b&gt;opt&lt;/b&gt; [담당자 추천이 필요하면]&lt;/span&gt;" style="shape=umlFrame;whiteSpace=wrap;html=1;width=320;height=30;boundedLbl=1;verticalAlign=middle;align=left;spacingLeft=5;strokeColor=#000000;strokeWidth=1;fillColor=default;" parent="1" vertex="1">
-                    <mxGeometry x="120" y="384" width="1000" height="120" as="geometry"/>
+                    <mxGeometry x="120" y="379" width="1000" height="120" as="geometry"/>
                 </mxCell>
                 <mxCell id="25" value="&lt;span style=&quot;font-size: 11px; background-color: rgb(255, 255, 255);&quot;&gt;1. 배정할 이슈 선택&lt;/span&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;dashed=1;strokeWidth=0.1;" parent="1" vertex="1">
                     <mxGeometry x="120" y="244" width="330" height="30" as="geometry"/>
@@ -152,9 +155,6 @@
                 </mxCell>
                 <mxCell id="27" value="" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#000000;strokeWidth=1;fillColor=default;" parent="1" vertex="1">
                     <mxGeometry x="157.5" y="749" width="15" height="29" as="geometry"/>
-                </mxCell>
-                <mxCell id="28" value="&lt;span style=&quot;text-align: center;&quot;&gt;&lt;b&gt;sd&amp;nbsp;&lt;/b&gt;&lt;/span&gt;&lt;b&gt;assignIssue&lt;/b&gt;( issueId: ID )" style="shape=umlFrame;whiteSpace=wrap;html=1;width=190;height=30;boundedLbl=1;verticalAlign=middle;align=left;spacingLeft=5;" parent="1" vertex="1">
-                    <mxGeometry x="100" y="90" width="1080" height="770" as="geometry"/>
                 </mxCell>
             </root>
         </mxGraphModel>
