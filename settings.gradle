@@ -2,4 +2,5 @@ rootProject.name = 'issue-tracker'
 include 'core'
 include 'swing'
 include 'javafx'
+include 'controller'
 

@@ -1,6 +1,6 @@
 package application.user.dto;
 
-import domain.user.UserRole;
+import user.UserRole;
 
 public record CreateUserCommand(
         Integer requesterUserId, // 유저 생성 요청한 유저(admin만)

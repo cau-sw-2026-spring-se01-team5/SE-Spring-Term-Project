@@ -1,4 +1,4 @@
-package domain.user;
+package user;
 
 public enum UserRole {
     ADMIN,
