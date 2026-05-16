@@ -1,7 +1,6 @@
 package main.project;
 
 import enums.user.v1.UserRole;
-import main.header.HeaderController;
 import project.dto.createProject.v1.CreateProjectInput;
 import project.dto.deleteProject.v1.DeleteProjectInput;
 import project.dto.updateProjectInfo.v1.UpdateProjectInfoInput;
@@ -13,18 +12,15 @@ public class ProjectController {
     private final ProjectView view;
     private final Project projectService;
     private final UserSession session;
-    private final HeaderController headerController;
 
     public ProjectController(
             ProjectView view,
             Project projectService,
-            UserSession session,
-            HeaderController headerController
+            UserSession session
     ) {
         this.view = view;
         this.projectService = projectService;
         this.session = session;
-        this.headerController = headerController;
 
         bind();
     }
@@ -48,10 +44,6 @@ public class ProjectController {
         );
 
         view.showMessage(output.message());
-
-        if (output.success()) {
-            headerController.refreshProjects();
-        }
     }
 
     private void updateProject() {
@@ -70,10 +62,6 @@ public class ProjectController {
         );
 
         view.showMessage(output.message());
-
-        if (output.success()) {
-            headerController.refreshProjects();
-        }
     }
 
     private void deleteProject() {
@@ -91,14 +79,10 @@ public class ProjectController {
         );
 
         view.showMessage(output.message());
-
-        if (output.success()) {
-            headerController.refreshProjects();
-        }
     }
 
     private Integer requireProjectId() {
-        Integer projectId = headerController.getSelectedProjectId();
+        Integer projectId = session.selectedProjectId();
 
         if (projectId == null) {
             view.showMessage("프로젝트를 선택하세요.");

@@ -7,6 +7,8 @@ public class UserSession {
     private Integer userId;
     private String loginId;
     private UserRole role;
+    private Integer selectedProjectId;
+    private String selectedProjectTitle;
 
     public void login(Integer userId, String loginId, UserRole role) {
         this.userId = userId;
@@ -18,6 +20,8 @@ public class UserSession {
         this.userId = null;
         this.loginId = null;
         this.role = null;
+        this.selectedProjectId = null;
+        this.selectedProjectTitle = null;
     }
 
     public Integer userId() {
@@ -30,6 +34,19 @@ public class UserSession {
 
     public UserRole role() {
         return role;
+    }
+
+    public void selectProject(Integer projectId, String projectTitle) {
+        this.selectedProjectId = projectId;
+        this.selectedProjectTitle = projectTitle;
+    }
+
+    public Integer selectedProjectId() {
+        return selectedProjectId;
+    }
+
+    public String selectedProjectTitle() {
+        return selectedProjectTitle;
     }
 
     public boolean isLoggedIn() {

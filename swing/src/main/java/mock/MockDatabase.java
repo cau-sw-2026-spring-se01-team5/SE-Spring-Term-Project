@@ -15,7 +15,7 @@ public class MockDatabase {
 
     private int nextProjectId = 2;
     private int nextUserId = 10;
-    private int nextIssueId = 100;
+    private int nextIssueId = 2;
     private int nextCommentId = 1000;
 
     private final Map<Integer, MockUserData> users = new LinkedHashMap<>();

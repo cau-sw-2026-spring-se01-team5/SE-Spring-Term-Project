@@ -11,33 +11,53 @@ import java.util.List;
 
 public interface IssueView {
 
+    record SearchCondition(
+            Integer assigneeUserId,
+            Integer reporterUserId,
+            Integer fixerUserId,
+            IssueStatus status,
+            IssuePriority priority,
+            String keyword
+    ) {}
+
+    record CreateIssueForm(
+            String title,
+            String description,
+            IssuePriority priority
+    ) {}
+
+    record AssigneeCandidate(
+            Integer userId,
+            String loginId
+    ) {}
+
+    record ProjectUserOption(
+            Integer userId,
+            String loginId,
+            UserRole role
+    ) {}
+
     void setIssues(List<IssueSummaryOutput> issues);
 
     Integer getSelectedIssueId();
 
-    String getIssueTitleInput();
-
-    String getIssueDescriptionInput();
-
-    IssuePriority getIssuePriorityInput();
+    Integer getActiveDetailIssueId();
 
     Integer getAssigneeUserIdInput();
+
+    void setAssigneeCandidates(List<AssigneeCandidate> candidates);
+
+    void setProjectUsers(List<ProjectUserOption> users);
 
     String getIssueCommentInput();
 
     IssueStatus getTargetIssueStatusInput();
 
-    Integer getFilterAssigneeUserId();
+    SearchCondition showSearchDialog();
 
-    Integer getFilterReporterUserId();
+    Integer showSearchResultAndSelectIssue(List<IssueSummaryOutput> issues);
 
-    Integer getFilterFixerUserId();
-
-    IssueStatus getFilterStatus();
-
-    IssuePriority getFilterPriority();
-
-    String getFilterKeyword();
+    CreateIssueForm showCreateIssueDialog();
 
     void showIssueDetail(GetIssueDetailOutput output);
 

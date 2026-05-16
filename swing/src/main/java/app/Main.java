@@ -8,6 +8,8 @@ import main.MainController;
 import main.MainPanel;
 import mock.*;
 import project.v1.Project;
+import projectselect.ProjectSelectController;
+import projectselect.ProjectSelectPanel;
 import session.UserSession;
 import user.v1.User;
 
@@ -28,6 +30,8 @@ public class Main {
 
             UserSession session = new UserSession();
             AppFrame frame = new AppFrame();
+            final Runnable[] showLoginRef = new Runnable[1];
+            final Runnable[] showProjectSelectRef = new Runnable[1];
 
             Runnable showLogin = () -> {
                 session.logout();
@@ -41,32 +45,49 @@ public class Main {
                             roleResolver.resolveRole(userId)
                     );
 
-                    MainPanel mainPanel = new MainPanel();
+                    Runnable showProjectSelect = () -> {
+                        ProjectSelectPanel selectPanel = new ProjectSelectPanel();
+                        ProjectSelectController selectController = new ProjectSelectController(
+                                selectPanel,
+                                project,
+                                auth,
+                                session,
+                                () -> {
+                                    MainPanel mainPanel = new MainPanel();
 
-                    MainController mainController = new MainController(
-                            mainPanel.headerPanel(),
-                            mainPanel.projectPanel(),
-                            mainPanel.userPanel(),
-                            mainPanel.issuePanel(),
+                                    MainController mainController = new MainController(
+                                            mainPanel.headerPanel(),
+                                            mainPanel.userPanel(),
+                                            mainPanel.issuePanel(),
 
-                            project,
-                            user,
-                            issue,
-                            auth,
+                                            project,
+                                            user,
+                                            issue,
+                                            auth,
 
-                            session,
-                            () -> frame.showLogin(loginPanel)
-                    );
+                                            session,
+                                            showProjectSelectRef[0],
+                                            showLoginRef[0]
+                                    );
 
-                    mainController.start();
+                                    mainController.start();
+                                    frame.showMain(mainPanel);
+                                },
+                                showLoginRef[0]
+                        );
 
-                    frame.showMain(mainPanel);
+                        selectController.start();
+                        frame.showProjectSelect(selectPanel);
+                    };
+                    showProjectSelectRef[0] = showProjectSelect;
+                    showProjectSelect.run();
                 });
 
                 new LoginController(loginPanel, auth);
 
                 frame.showLogin(loginPanel);
             };
+            showLoginRef[0] = showLogin;
 
             showLogin.run();
 

@@ -2,7 +2,6 @@ package main;
 
 import main.header.HeaderPanel;
 import main.issue.IssuePanel;
-import main.project.ProjectPanel;
 import main.user.UserPanel;
 
 import javax.swing.*;
@@ -12,7 +11,6 @@ public class MainPanel extends JPanel {
 
     private final HeaderPanel headerPanel = new HeaderPanel();
     private final IssuePanel issuePanel = new IssuePanel();
-    private final ProjectPanel projectPanel = new ProjectPanel();
     private final UserPanel userPanel = new UserPanel();
 
     private final JTabbedPane tabbedPane = new JTabbedPane();
@@ -23,7 +21,6 @@ public class MainPanel extends JPanel {
         add(headerPanel, BorderLayout.NORTH);
 
         tabbedPane.addTab("Issues", issuePanel);
-        tabbedPane.addTab("Projects", projectPanel);
         tabbedPane.addTab("Users", userPanel);
 
         add(tabbedPane, BorderLayout.CENTER);
@@ -37,19 +34,11 @@ public class MainPanel extends JPanel {
         return issuePanel;
     }
 
-    public ProjectPanel projectPanel() {
-        return projectPanel;
-    }
-
     public UserPanel userPanel() {
         return userPanel;
     }
 
-    public void setProjectTabEnabled(boolean enabled) {
-        tabbedPane.setEnabledAt(1, enabled);
-    }
-
     public void setUserTabEnabled(boolean enabled) {
-        tabbedPane.setEnabledAt(2, enabled);
+        tabbedPane.setEnabledAt(1, enabled);
     }
 }

@@ -78,8 +78,9 @@ public class MockIssue implements Issue {
 
     @Override
     public AssignIssueOutput assignIssue(AssignIssueInput input) {
-        if (!hasRole(input.requesterUserId(), UserRole.PL)) {
-            return new AssignIssueOutput(false, input.issueId(), "PL만 이슈를 배정할 수 있습니다.");
+        if (!hasRole(input.requesterUserId(), UserRole.PL)
+                && !isAdmin(input.requesterUserId())) {
+            return new AssignIssueOutput(false, input.issueId(), "PL 또는 Admin만 이슈를 배정할 수 있습니다.");
         }
 
         MockUserData assignee = database.users().get(input.assigneeUserId());
@@ -94,10 +95,16 @@ public class MockIssue implements Issue {
             return new AssignIssueOutput(false, input.issueId(), "이슈가 존재하지 않습니다.");
         }
 
+        if (issue.status() != IssueStatus.NEW && issue.status() != IssueStatus.REOPENED) {
+            return new AssignIssueOutput(false, input.issueId(), "NEW 또는 REOPENED 상태 이슈만 배정할 수 있습니다.");
+        }
+
+        if (!Objects.equals(issue.projectId(), assignee.projectId())) {
+            return new AssignIssueOutput(false, input.issueId(), "동일 프로젝트의 DEV에게만 배정할 수 있습니다.");
+        }
+
         issue.updateAssigneeUserId(input.assigneeUserId());
         issue.updateStatus(IssueStatus.ASSIGNED);
-
-        addCommentInternal(issue, input.requesterUserId(), input.comment());
 
         return new AssignIssueOutput(true, input.issueId(), "이슈 배정 성공");
     }
@@ -112,23 +119,61 @@ public class MockIssue implements Issue {
 
         IssueStatus targetStatus = input.targetStatus();
 
+        if (targetStatus == null) {
+            return new ChangeIssueStatusOutput(false, input.issueId(), issue.status(), "변경할 상태를 선택하세요.");
+        }
+
+        if (targetStatus == IssueStatus.ASSIGNED) {
+            return new ChangeIssueStatusOutput(false, input.issueId(), issue.status(), "ASSIGNED 전환은 배정 기능을 사용하세요.");
+        }
+
+        boolean admin = isAdmin(input.requesterUserId());
+
         if (targetStatus == IssueStatus.FIXED) {
-            if (!hasRole(input.requesterUserId(), UserRole.DEV)) {
+            if (!admin && !hasRole(input.requesterUserId(), UserRole.DEV)) {
                 return new ChangeIssueStatusOutput(false, input.issueId(), issue.status(), "DEV만 fixed 처리할 수 있습니다.");
             }
 
-            issue.updateFixerUserId(input.requesterUserId());
+            if (issue.status() != IssueStatus.ASSIGNED) {
+                return new ChangeIssueStatusOutput(false, input.issueId(), issue.status(), "ASSIGNED 상태에서만 FIXED로 변경할 수 있습니다.");
+            }
+
+            if (hasRole(input.requesterUserId(), UserRole.DEV)) {
+                issue.updateFixerUserId(input.requesterUserId());
+            }
         }
 
         if (targetStatus == IssueStatus.RESOLVED) {
-            if (!hasRole(input.requesterUserId(), UserRole.TESTER)) {
+            if (!admin && !hasRole(input.requesterUserId(), UserRole.TESTER)) {
                 return new ChangeIssueStatusOutput(false, input.issueId(), issue.status(), "TESTER만 resolved 처리할 수 있습니다.");
+            }
+
+            if (!admin && !Objects.equals(issue.reporterUserId(), input.requesterUserId())) {
+                return new ChangeIssueStatusOutput(false, input.issueId(), issue.status(), "해당 이슈를 등록한 TESTER만 resolved 처리할 수 있습니다.");
+            }
+
+            if (issue.status() != IssueStatus.FIXED) {
+                return new ChangeIssueStatusOutput(false, input.issueId(), issue.status(), "FIXED 상태에서만 RESOLVED로 변경할 수 있습니다.");
             }
         }
 
         if (targetStatus == IssueStatus.CLOSED) {
-            if (!hasRole(input.requesterUserId(), UserRole.PL)) {
+            if (!admin && !hasRole(input.requesterUserId(), UserRole.PL)) {
                 return new ChangeIssueStatusOutput(false, input.issueId(), issue.status(), "PL만 closed 처리할 수 있습니다.");
+            }
+
+            if (issue.status() != IssueStatus.RESOLVED) {
+                return new ChangeIssueStatusOutput(false, input.issueId(), issue.status(), "RESOLVED 상태에서만 CLOSED로 변경할 수 있습니다.");
+            }
+        }
+
+        if (targetStatus == IssueStatus.REOPENED) {
+            if (!admin) {
+                return new ChangeIssueStatusOutput(false, input.issueId(), issue.status(), "REOPENED는 Admin만 처리할 수 있습니다.");
+            }
+
+            if (issue.status() != IssueStatus.RESOLVED) {
+                return new ChangeIssueStatusOutput(false, input.issueId(), issue.status(), "RESOLVED 상태에서만 REOPENED로 변경할 수 있습니다.");
             }
         }
 

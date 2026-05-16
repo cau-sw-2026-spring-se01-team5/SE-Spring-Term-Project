@@ -6,8 +6,6 @@ import main.header.HeaderController;
 import main.header.HeaderView;
 import main.issue.IssueController;
 import main.issue.IssueView;
-import main.project.ProjectController;
-import main.project.ProjectView;
 import main.user.UserController;
 import main.user.UserView;
 import project.v1.Project;
@@ -17,13 +15,11 @@ import user.v1.User;
 public class MainController {
 
     private final HeaderController headerController;
-    private final ProjectController projectController;
     private final UserController userController;
     private final IssueController issueController;
 
     public MainController(
             HeaderView headerView,
-            ProjectView projectView,
             UserView userView,
             IssueView issueView,
 
@@ -33,48 +29,37 @@ public class MainController {
             Auth authService,
 
             UserSession session,
+            Runnable backToProjectListCallback,
             Runnable logoutCallback
     ) {
         this.headerController = new HeaderController(
                 headerView,
-                projectService,
                 authService,
                 session,
+                backToProjectListCallback,
                 logoutCallback
-        );
-
-        this.projectController = new ProjectController(
-                projectView,
-                projectService,
-                session,
-                headerController
         );
 
         this.userController = new UserController(
                 userView,
                 userService,
-                session,
-                headerController
+                session
         );
 
         this.issueController = new IssueController(
                 issueView,
                 issueService,
-                session,
-                headerController
+                userService,
+                session
         );
-
-        this.headerController.setProjectSelectedCallback(() -> {
-            userController.refreshUsers();
-            issueController.searchIssues();
-        });
     }
 
     public void start() {
-        projectController.applyRole();
         userController.applyRole();
         issueController.applyRole();
 
         headerController.start();
+        userController.refreshUsers();
+        issueController.loadAllIssues();
     }
 }
