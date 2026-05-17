@@ -10,6 +10,7 @@ import issue.dto.recommendAssignee.v1.RecommendAssigneeInput;
 import issue.dto.registerIssue.v1.RegisterIssueInput;
 import issue.v1.Issue;
 import enums.user.v1.UserRole;
+import main.support.ProjectContextGuard;
 import session.UserSession;
 import user.dto.getProjectUserList.v1.GetProjectUserListInput;
 import user.v1.User;
@@ -22,6 +23,7 @@ public class IssueController {
     private final Issue issueService;
     private final User userService;
     private final UserSession session;
+    private final ProjectContextGuard projectContextGuard;
 
     public IssueController(
             IssueView view,
@@ -33,6 +35,7 @@ public class IssueController {
         this.issueService = issueService;
         this.userService = userService;
         this.session = session;
+        this.projectContextGuard = new ProjectContextGuard(session);
 
         bind();
     }
@@ -294,14 +297,7 @@ public class IssueController {
     }
 
     private Integer requireProjectId() {
-        Integer projectId = session.selectedProjectId();
-
-        if (projectId == null) {
-            view.showMessage("프로젝트를 선택하세요.");
-            return null;
-        }
-
-        return projectId;
+        return projectContextGuard.requireProjectId(view::showMessage);
     }
 
     private Integer requireIssueId() {

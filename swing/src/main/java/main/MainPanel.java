@@ -3,6 +3,7 @@ package main;
 import main.header.HeaderPanel;
 import main.issue.IssuePanel;
 import main.user.UserPanel;
+import ui.UiTheme;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,11 +18,14 @@ public class MainPanel extends JPanel {
 
     public MainPanel() {
         setLayout(new BorderLayout());
+        setBackground(UiTheme.BG);
 
         add(headerPanel, BorderLayout.NORTH);
 
         tabbedPane.addTab("Issues", issuePanel);
         tabbedPane.addTab("Users", userPanel);
+        tabbedPane.setBackground(UiTheme.CARD_BG);
+        tabbedPane.setForeground(Color.BLACK);
 
         add(tabbedPane, BorderLayout.CENTER);
     }

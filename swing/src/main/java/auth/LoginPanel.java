@@ -3,6 +3,7 @@ package auth;
 import javax.swing.*;
 import java.awt.*;
 import java.util.function.Consumer;
+import ui.UiTheme;
 
 /* 로그인 화면의 실제 UI 구현체 */
 /* 로그인 입력창 생성
@@ -25,13 +26,18 @@ public class LoginPanel extends JPanel implements LoginView {
 
     public LoginPanel() {
         setLayout(new GridBagLayout()); // 패널 레이아웃을 GridBagLayout으로 지정
+        setBackground(UiTheme.BG);
         setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40)); // 여백 지정
         GridBagConstraints gbc = new GridBagConstraints(); // GridBagLayout 배치 규칙 지정 위한 객체
         gbc.insets = new Insets(10, 10, 10, 10); // 컴포넌트 간 여백 지정 -> 마진인듯..?
         gbc.fill = GridBagConstraints.HORIZONTAL; // 가로 방향 배치 기준
         JLabel titleLabel = new JLabel("Issue Tracking System"); // 상단 제목
-        titleLabel.setFont(new Font("SansSerif", Font.BOLD, 24)); // 폰트 지정
+        titleLabel.setForeground(Color.BLACK);
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER); // 가운데 정렬
+
+        UiTheme.styleTextField(loginIdField);
+        UiTheme.stylePasswordField(passwordField);
+        UiTheme.stylePrimaryButton(loginButton);
 
         // 현재 컴포넌트 지정 위치.
         // 0행 0열
@@ -47,7 +53,9 @@ public class LoginPanel extends JPanel implements LoginView {
         // 1행 0열
         gbc.gridy = 1;
         gbc.gridx = 0;
-        add(new JLabel("ID"), gbc); // ID 라벨 추가
+        JLabel idLabel = new JLabel("ID");
+        idLabel.setForeground(Color.BLACK);
+        add(idLabel, gbc); // ID 라벨 추가
 
         // 1행 1열
         gbc.gridx = 1;
@@ -56,7 +64,9 @@ public class LoginPanel extends JPanel implements LoginView {
         // 2행 0열
         gbc.gridy = 2;
         gbc.gridx = 0;
-        add(new JLabel("Password"), gbc); // pw 라벨 추가
+        JLabel pwLabel = new JLabel("Password");
+        pwLabel.setForeground(Color.BLACK);
+        add(pwLabel, gbc); // pw 라벨 추가
 
         // 2행 1열
         gbc.gridx = 1;

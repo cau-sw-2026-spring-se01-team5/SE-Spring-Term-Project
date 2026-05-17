@@ -2,6 +2,8 @@ package projectselect;
 
 import main.NamedItem;
 import project.dto.getProjectList.v1.ProjectInfoOutput;
+import ui.UiTheme;
+import ui.event.UiEvent;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,19 +21,27 @@ public class ProjectSelectPanel extends JPanel implements ProjectSelectView {
     private final JButton updateProjectButton = new JButton("프로젝트 제목 수정");
     private final JButton deleteProjectButton = new JButton("선택 프로젝트 삭제");
 
+    private final UiEvent loadProjectsEvent = new UiEvent();
+    private final UiEvent createProjectEvent = new UiEvent();
+    private final UiEvent updateProjectEvent = new UiEvent();
+    private final UiEvent deleteProjectEvent = new UiEvent();
+    private final UiEvent enterProjectEvent = new UiEvent();
+    private final UiEvent logoutEvent = new UiEvent();
+
     private final JPanel adminPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
     private final JLabel hintLabel = new JLabel("프로젝트를 선택한 뒤 입장하세요.");
 
     public ProjectSelectPanel() {
         setLayout(new BorderLayout(16, 16));
+        setBackground(UiTheme.BG);
         setBorder(BorderFactory.createEmptyBorder(28, 36, 28, 36));
 
         JLabel title = new JLabel("Project List", SwingConstants.LEFT);
-        title.setFont(new Font("Serif", Font.BOLD, 34));
-        title.setForeground(new Color(24, 33, 57));
+        title.setForeground(Color.BLACK);
 
         JPanel center = new JPanel(new GridBagLayout());
-        center.setOpaque(false);
+        center.setBackground(UiTheme.CARD_BG);
+        center.setBorder(UiTheme.cardBorder(16));
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(8, 8, 8, 8);
@@ -41,7 +51,7 @@ public class ProjectSelectPanel extends JPanel implements ProjectSelectView {
         gbc.gridy = 0;
 
         JLabel projectLabel = new JLabel("Project");
-        projectLabel.setFont(new Font("Dialog", Font.BOLD, 14));
+        projectLabel.setForeground(Color.BLACK);
         center.add(projectLabel, gbc);
 
         gbc.gridx = 1;
@@ -52,7 +62,7 @@ public class ProjectSelectPanel extends JPanel implements ProjectSelectView {
         gbc.gridy = 1;
         gbc.gridwidth = 2;
 
-        hintLabel.setForeground(new Color(70, 82, 105));
+        hintLabel.setForeground(Color.BLACK);
         center.add(hintLabel, gbc);
 
         JPanel basicActionPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
@@ -70,6 +80,21 @@ public class ProjectSelectPanel extends JPanel implements ProjectSelectView {
         bottom.setOpaque(false);
         bottom.add(basicActionPanel);
         bottom.add(adminPanel);
+
+        UiTheme.styleCombo(projectComboBox);
+        UiTheme.styleSecondaryButton(refreshButton);
+        UiTheme.stylePrimaryButton(enterButton);
+        UiTheme.styleSecondaryButton(logoutButton);
+        UiTheme.stylePrimaryButton(createProjectButton);
+        UiTheme.styleSecondaryButton(updateProjectButton);
+        UiTheme.styleDangerButton(deleteProjectButton);
+
+        refreshButton.addActionListener(e -> loadProjectsEvent.emit());
+        createProjectButton.addActionListener(e -> createProjectEvent.emit());
+        updateProjectButton.addActionListener(e -> updateProjectEvent.emit());
+        deleteProjectButton.addActionListener(e -> deleteProjectEvent.emit());
+        enterButton.addActionListener(e -> enterProjectEvent.emit());
+        logoutButton.addActionListener(e -> logoutEvent.emit());
 
         add(title, BorderLayout.NORTH);
         add(center, BorderLayout.CENTER);
@@ -133,32 +158,32 @@ public class ProjectSelectPanel extends JPanel implements ProjectSelectView {
 
     @Override
     public void onLoadProjects(Runnable handler) {
-        refreshButton.addActionListener(e -> handler.run());
+        loadProjectsEvent.subscribe(handler);
     }
 
     @Override
     public void onCreateProject(Runnable handler) {
-        createProjectButton.addActionListener(e -> handler.run());
+        createProjectEvent.subscribe(handler);
     }
 
     @Override
     public void onUpdateProject(Runnable handler) {
-        updateProjectButton.addActionListener(e -> handler.run());
+        updateProjectEvent.subscribe(handler);
     }
 
     @Override
     public void onDeleteProject(Runnable handler) {
-        deleteProjectButton.addActionListener(e -> handler.run());
+        deleteProjectEvent.subscribe(handler);
     }
 
     @Override
     public void onEnterProject(Runnable handler) {
-        enterButton.addActionListener(e -> handler.run());
+        enterProjectEvent.subscribe(handler);
     }
 
     @Override
     public void onLogout(Runnable handler) {
-        logoutButton.addActionListener(e -> handler.run());
+        logoutEvent.subscribe(handler);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package main.user;
 
 import enums.user.v1.UserRole;
+import main.support.ProjectContextGuard;
 import session.UserSession;
 import user.dto.createUser.v1.CreateUserInput;
 import user.dto.deleteUser.v1.DeleteUserInput;
@@ -12,6 +13,7 @@ public class UserController {
     private final UserView view;
     private final User userService;
     private final UserSession session;
+    private final ProjectContextGuard projectContextGuard;
 
     public UserController(
             UserView view,
@@ -21,6 +23,7 @@ public class UserController {
         this.view = view;
         this.userService = userService;
         this.session = session;
+        this.projectContextGuard = new ProjectContextGuard(session);
 
         bind();
     }
@@ -109,13 +112,6 @@ public class UserController {
     }
 
     private Integer requireProjectId() {
-        Integer projectId = session.selectedProjectId();
-
-        if (projectId == null) {
-            view.showMessage("프로젝트를 선택하세요.");
-            return null;
-        }
-
-        return projectId;
+        return projectContextGuard.requireProjectId(view::showMessage);
     }
 }

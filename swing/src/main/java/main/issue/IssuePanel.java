@@ -7,6 +7,10 @@ import issue.dto.getIssueDetail.v1.CommentOutput;
 import issue.dto.getIssueDetail.v1.GetIssueDetailOutput;
 import issue.dto.getIssueList.v1.IssueSummaryOutput;
 import issue.dto.recommendAssignee.v1.RecommendAssigneeOutput;
+import main.issue.role.IssueActionPolicyRegistry;
+import main.issue.role.IssueActionView;
+import ui.UiTheme;
+import ui.event.UiEvent;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -24,16 +28,29 @@ public class IssuePanel extends JPanel implements IssueView {
     private final JButton registerIssueButton = new JButton("이슈 등록");
     private final JButton showDetailButton = new JButton("상세 조회");
 
+    private final UiEvent searchIssuesEvent = new UiEvent();
+    private final UiEvent registerIssueEvent = new UiEvent();
+    private final UiEvent showIssueDetailEvent = new UiEvent();
+    private final UiEvent assignIssueEvent = new UiEvent();
+    private final UiEvent changeStatusEvent = new UiEvent();
+    private final UiEvent addCommentEvent = new UiEvent();
+    private final UiEvent recommendEvent = new UiEvent();
+    private final UiEvent deleteIssueEvent = new UiEvent();
+
+    private final IssueActionPolicyRegistry issueActionPolicyRegistry = new IssueActionPolicyRegistry();
+    private final DetailActionView detailActionView = new DetailActionView();
+
     private UserRole currentRole;
-    private Runnable assignIssueHandler = () -> {};
-    private Runnable changeStatusHandler = () -> {};
-    private Runnable addCommentHandler = () -> {};
-    private Runnable recommendHandler = () -> {};
-    private Runnable deleteIssueHandler = () -> {};
 
     private JDialog detailDialog;
     private JLabel detailHeaderLabel;
-    private JTextArea overviewArea;
+    private JLabel detailReporterValueLabel;
+    private JLabel detailAssigneeValueLabel;
+    private JLabel detailFixerValueLabel;
+    private JLabel detailPriorityValueLabel;
+    private JLabel detailStatusValueLabel;
+    private JLabel detailReportedValueLabel;
+    private JTextArea detailDescriptionArea;
     private JPanel commentsListPanel;
     private JScrollPane commentsScrollPane;
 
@@ -47,6 +64,7 @@ public class IssuePanel extends JPanel implements IssueView {
     private JButton detailDeleteButton;
     private JButton detailCommentButton;
     private JLabel detailAssigneeLabel;
+    private JLabel detailStatusLabel;
     private List<AssigneeCandidate> assigneeCandidates = new ArrayList<>();
     private List<ProjectUserOption> projectUsers = new ArrayList<>();
     private Integer activeDetailIssueId;
@@ -83,14 +101,29 @@ public class IssuePanel extends JPanel implements IssueView {
 
     public IssuePanel() {
         setLayout(new BorderLayout());
+        setBackground(UiTheme.BG);
 
         JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        top.setOpaque(false);
+        top.setBorder(new EmptyBorder(10, 10, 6, 10));
         top.add(searchIssueButton);
         top.add(registerIssueButton);
         top.add(showDetailButton);
 
+        searchIssueButton.addActionListener(e -> searchIssuesEvent.emit());
+        registerIssueButton.addActionListener(e -> registerIssueEvent.emit());
+        showDetailButton.addActionListener(e -> showIssueDetailEvent.emit());
+
+        UiTheme.styleSecondaryButton(searchIssueButton);
+        UiTheme.stylePrimaryButton(registerIssueButton);
+        UiTheme.stylePrimaryButton(showDetailButton);
+        UiTheme.styleTable(issueTable);
+
+        JScrollPane tableScroll = new JScrollPane(issueTable);
+        tableScroll.setBorder(UiTheme.cardBorder(6));
+
         add(top, BorderLayout.NORTH);
-        add(new JScrollPane(issueTable), BorderLayout.CENTER);
+        add(tableScroll, BorderLayout.CENTER);
     }
 
     @Override
@@ -166,6 +199,12 @@ public class IssuePanel extends JPanel implements IssueView {
         JComboBox<IssueStatus> statusCombo = new JComboBox<>();
         JComboBox<IssuePriority> priorityCombo = new JComboBox<>();
         JTextField keywordField = new JTextField(14);
+        UiTheme.styleCombo(assigneeCombo);
+        UiTheme.styleCombo(reporterCombo);
+        UiTheme.styleCombo(fixerCombo);
+        UiTheme.styleCombo(statusCombo);
+        UiTheme.styleCombo(priorityCombo);
+        UiTheme.styleTextField(keywordField);
 
         assigneeCombo.addItem(new UserFilterOption(null, "(전체)"));
         reporterCombo.addItem(new UserFilterOption(null, "(전체)"));
@@ -238,10 +277,12 @@ public class IssuePanel extends JPanel implements IssueView {
         IssueTableModel popupTableModel = new IssueTableModel();
         popupTableModel.setIssues(issues);
         JTable table = new JTable(popupTableModel);
+        UiTheme.styleTable(table);
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setPreferredSize(new Dimension(920, 300));
 
         JPanel panel = new JPanel(new BorderLayout(8, 8));
+        panel.setBackground(UiTheme.CARD_BG);
         panel.add(scrollPane, BorderLayout.CENTER);
         panel.add(new JLabel("이슈를 선택한 뒤 '상세 조회'를 누르세요."), BorderLayout.SOUTH);
 
@@ -277,6 +318,9 @@ public class IssuePanel extends JPanel implements IssueView {
         JTextField titleField = new JTextField(20);
         JTextField descriptionField = new JTextField(20);
         JComboBox<IssuePriority> priorityCombo = new JComboBox<>(IssuePriority.values());
+        UiTheme.styleTextField(titleField);
+        UiTheme.styleTextField(descriptionField);
+        UiTheme.styleCombo(priorityCombo);
 
         JPanel panel = new JPanel(new GridLayout(3, 2, 8, 8));
         panel.add(new JLabel("Title"));
@@ -331,21 +375,11 @@ public class IssuePanel extends JPanel implements IssueView {
         detailDialog.setLocationRelativeTo(this);
 
         JPanel root = new JPanel(new BorderLayout(12, 12));
+        root.setBackground(UiTheme.BG);
         root.setBorder(new EmptyBorder(14, 14, 14, 14));
 
         detailHeaderLabel = new JLabel();
-        detailHeaderLabel.setFont(new Font("Dialog", Font.BOLD, 20));
-
-        overviewArea = new JTextArea();
-        overviewArea.setEditable(false);
-        overviewArea.setLineWrap(true);
-        overviewArea.setWrapStyleWord(true);
-        overviewArea.setFont(new Font("Dialog", Font.PLAIN, 13));
-        overviewArea.setBackground(new Color(247, 249, 252));
-        overviewArea.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(220, 224, 230)),
-                new EmptyBorder(8, 8, 8, 8)
-        ));
+        detailHeaderLabel.setForeground(Color.BLACK);
 
         JPanel commentsCard = new JPanel(new BorderLayout(8, 8));
         commentsCard.setBorder(BorderFactory.createTitledBorder("Comments"));
@@ -359,9 +393,10 @@ public class IssuePanel extends JPanel implements IssueView {
         commentsCard.add(commentsScrollPane, BorderLayout.CENTER);
 
         JPanel actionCard = buildDetailActionPanel();
+        JPanel issueOverviewCard = buildIssueOverviewCard();
 
         JPanel center = new JPanel(new BorderLayout(10, 10));
-        center.add(overviewArea, BorderLayout.NORTH);
+        center.add(issueOverviewCard, BorderLayout.NORTH);
         center.add(commentsCard, BorderLayout.CENTER);
         center.add(actionCard, BorderLayout.SOUTH);
 
@@ -371,16 +406,83 @@ public class IssuePanel extends JPanel implements IssueView {
         detailDialog.setContentPane(root);
     }
 
+    private JPanel buildIssueOverviewCard() {
+        JPanel overviewCard = new JPanel(new BorderLayout(8, 8));
+        overviewCard.setBackground(new Color(247, 249, 252));
+        overviewCard.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(220, 224, 230)),
+                new EmptyBorder(10, 10, 10, 10)
+        ));
+
+        detailReporterValueLabel = createMetaValueLabel();
+        detailAssigneeValueLabel = createMetaValueLabel();
+        detailFixerValueLabel = createMetaValueLabel();
+        detailPriorityValueLabel = createMetaValueLabel();
+        detailStatusValueLabel = createMetaValueLabel();
+        detailReportedValueLabel = createMetaValueLabel();
+
+        JPanel metaGrid = new JPanel(new GridLayout(3, 4, 10, 8));
+        metaGrid.setOpaque(false);
+        metaGrid.add(createMetaTitleLabel("Reporter"));
+        metaGrid.add(detailReporterValueLabel);
+        metaGrid.add(createMetaTitleLabel("Assignee"));
+        metaGrid.add(detailAssigneeValueLabel);
+        metaGrid.add(createMetaTitleLabel("Fixer"));
+        metaGrid.add(detailFixerValueLabel);
+        metaGrid.add(createMetaTitleLabel("Priority"));
+        metaGrid.add(detailPriorityValueLabel);
+        metaGrid.add(createMetaTitleLabel("Status"));
+        metaGrid.add(detailStatusValueLabel);
+        metaGrid.add(createMetaTitleLabel("Reported"));
+        metaGrid.add(detailReportedValueLabel);
+
+        detailDescriptionArea = new JTextArea(4, 50);
+        detailDescriptionArea.setEditable(false);
+        detailDescriptionArea.setLineWrap(true);
+        detailDescriptionArea.setWrapStyleWord(true);
+        detailDescriptionArea.setForeground(Color.BLACK);
+        detailDescriptionArea.setBackground(Color.WHITE);
+        detailDescriptionArea.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(220, 224, 230)),
+                new EmptyBorder(8, 8, 8, 8)
+        ));
+
+        JPanel descriptionPanel = new JPanel(new BorderLayout(6, 6));
+        descriptionPanel.setOpaque(false);
+        JLabel descriptionLabel = new JLabel("Description");
+        descriptionLabel.setForeground(Color.BLACK);
+        descriptionPanel.add(descriptionLabel, BorderLayout.NORTH);
+        descriptionPanel.add(new JScrollPane(detailDescriptionArea), BorderLayout.CENTER);
+
+        overviewCard.add(metaGrid, BorderLayout.NORTH);
+        overviewCard.add(descriptionPanel, BorderLayout.CENTER);
+        return overviewCard;
+    }
+
+    private JLabel createMetaTitleLabel(String title) {
+        JLabel label = new JLabel(title);
+        label.setForeground(new Color(90, 90, 90));
+        return label;
+    }
+
+    private JLabel createMetaValueLabel() {
+        JLabel label = new JLabel("-");
+        label.setForeground(Color.BLACK);
+        return label;
+    }
+
     private JPanel buildDetailActionPanel() {
         JPanel actionCard = new JPanel(new BorderLayout(10, 10));
         actionCard.setBorder(BorderFactory.createTitledBorder("Actions"));
+        actionCard.setBackground(UiTheme.CARD_BG);
 
         JPanel topActions = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        topActions.setOpaque(false);
         detailAssigneeCombo = new JComboBox<>();
         detailAssignButton = new JButton("UC03 이슈 배정");
         detailRecommendButton = new JButton("담당자 추천");
         detailStatusCombo = new JComboBox<>();
-        detailStatusButton = new JButton("UC04/05/06 상태 반영");
+        detailStatusButton = new JButton("상태 변경");
         detailDeleteButton = new JButton("이슈 삭제");
 
         detailAssigneeLabel = new JLabel("Assignee DEV");
@@ -388,12 +490,17 @@ public class IssuePanel extends JPanel implements IssueView {
         topActions.add(detailAssigneeCombo);
         topActions.add(detailAssignButton);
         topActions.add(detailRecommendButton);
-        topActions.add(new JLabel("Target Status"));
-        topActions.add(detailStatusCombo);
-        topActions.add(detailStatusButton);
         topActions.add(detailDeleteButton);
 
+        JPanel statusActionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        statusActionPanel.setOpaque(false);
+        detailStatusLabel = new JLabel("Target Status");
+        statusActionPanel.add(detailStatusLabel);
+        statusActionPanel.add(detailStatusCombo);
+        statusActionPanel.add(detailStatusButton);
+
         JPanel commentComposer = new JPanel(new BorderLayout(8, 8));
+        commentComposer.setOpaque(false);
         detailCommentArea = new JTextArea(3, 40);
         detailCommentArea.setLineWrap(true);
         detailCommentArea.setWrapStyleWord(true);
@@ -405,14 +512,27 @@ public class IssuePanel extends JPanel implements IssueView {
         commentComposer.add(new JScrollPane(detailCommentArea), BorderLayout.CENTER);
         commentComposer.add(detailCommentButton, BorderLayout.EAST);
 
-        detailAssignButton.addActionListener(e -> assignIssueHandler.run());
-        detailRecommendButton.addActionListener(e -> recommendHandler.run());
-        detailStatusButton.addActionListener(e -> changeStatusHandler.run());
-        detailDeleteButton.addActionListener(e -> deleteIssueHandler.run());
-        detailCommentButton.addActionListener(e -> addCommentHandler.run());
+        detailAssignButton.addActionListener(e -> assignIssueEvent.emit());
+        detailRecommendButton.addActionListener(e -> recommendEvent.emit());
+        detailStatusButton.addActionListener(e -> changeStatusEvent.emit());
+        detailDeleteButton.addActionListener(e -> deleteIssueEvent.emit());
+        detailCommentButton.addActionListener(e -> addCommentEvent.emit());
+
+        JPanel body = new JPanel(new BorderLayout(8, 8));
+        body.setOpaque(false);
+        body.add(statusActionPanel, BorderLayout.NORTH);
+        body.add(commentComposer, BorderLayout.CENTER);
+
+        UiTheme.styleCombo(detailAssigneeCombo);
+        UiTheme.styleCombo(detailStatusCombo);
+        UiTheme.stylePrimaryButton(detailAssignButton);
+        UiTheme.styleSecondaryButton(detailRecommendButton);
+        UiTheme.stylePrimaryButton(detailStatusButton);
+        UiTheme.styleDangerButton(detailDeleteButton);
+        UiTheme.stylePrimaryButton(detailCommentButton);
 
         actionCard.add(topActions, BorderLayout.NORTH);
-        actionCard.add(commentComposer, BorderLayout.CENTER);
+        actionCard.add(body, BorderLayout.CENTER);
 
         return actionCard;
     }
@@ -422,15 +542,16 @@ public class IssuePanel extends JPanel implements IssueView {
         detailHeaderLabel.setText("Issue #" + output.issueId() + "  " + output.issueTitle());
 
         String assigneeDisplay = resolveAssigneeDisplay(output.assigneeUserId());
-        String overview = "Reporter: " + output.reporterUserId()
-                + "\nAssignee: " + assigneeDisplay
-                + "\nFixer: " + output.fixerUserId()
-                + "\nPriority: " + output.priority()
-                + "\nStatus: " + output.status()
-                + "\nReported: " + output.reportedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
-                + "\n\nDescription\n" + output.issueDescription();
+        detailReporterValueLabel.setText(displayValue(output.reporterUserId()));
+        detailAssigneeValueLabel.setText(displayValue(assigneeDisplay));
+        detailFixerValueLabel.setText(displayValue(output.fixerUserId()));
+        detailPriorityValueLabel.setText(displayValue(output.priority()));
+        detailStatusValueLabel.setText(displayValue(output.status()));
+        detailReportedValueLabel.setText(output.reportedDate() == null
+                ? "-"
+                : output.reportedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+        detailDescriptionArea.setText(displayValue(output.issueDescription()));
 
-        overviewArea.setText(overview);
         renderComments(output.comments());
 
         refreshAssigneeComboSelection(output.assigneeUserId());
@@ -439,6 +560,15 @@ public class IssuePanel extends JPanel implements IssueView {
         detailCommentArea.setEditable(true);
 
         applyRoleToDetailActions();
+    }
+
+    private String displayValue(Object value) {
+        if (value == null) {
+            return "-";
+        }
+
+        String text = value.toString();
+        return text.isBlank() ? "-" : text;
     }
 
     private void refreshAssigneeComboSelection(Integer assigneeUserId) {
@@ -495,8 +625,7 @@ public class IssuePanel extends JPanel implements IssueView {
 
             JLabel meta = new JLabel(comment.authorUserId() + "  ·  "
                     + comment.createdAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
-            meta.setForeground(new Color(82, 93, 110));
-            meta.setFont(new Font("Dialog", Font.BOLD, 12));
+            meta.setForeground(Color.BLACK);
 
             JTextArea text = new JTextArea(comment.comment());
             text.setEditable(false);
@@ -534,42 +663,42 @@ public class IssuePanel extends JPanel implements IssueView {
 
     @Override
     public void onSearchIssues(Runnable handler) {
-        searchIssueButton.addActionListener(e -> handler.run());
+        searchIssuesEvent.subscribe(handler);
     }
 
     @Override
     public void onRegisterIssue(Runnable handler) {
-        registerIssueButton.addActionListener(e -> handler.run());
+        registerIssueEvent.subscribe(handler);
     }
 
     @Override
     public void onAssignIssue(Runnable handler) {
-        this.assignIssueHandler = handler;
+        assignIssueEvent.subscribe(handler);
     }
 
     @Override
     public void onChangeIssueStatus(Runnable handler) {
-        this.changeStatusHandler = handler;
+        changeStatusEvent.subscribe(handler);
     }
 
     @Override
     public void onAddIssueComment(Runnable handler) {
-        this.addCommentHandler = handler;
+        addCommentEvent.subscribe(handler);
     }
 
     @Override
     public void onShowIssueDetail(Runnable handler) {
-        showDetailButton.addActionListener(e -> handler.run());
+        showIssueDetailEvent.subscribe(handler);
     }
 
     @Override
     public void onRecommendAssignee(Runnable handler) {
-        this.recommendHandler = handler;
+        recommendEvent.subscribe(handler);
     }
 
     @Override
     public void onDeleteIssue(Runnable handler) {
-        this.deleteIssueHandler = handler;
+        deleteIssueEvent.subscribe(handler);
     }
 
     @Override
@@ -587,32 +716,7 @@ public class IssuePanel extends JPanel implements IssueView {
             return;
         }
 
-        boolean admin = currentRole == UserRole.ADMIN;
-        boolean pl = currentRole == UserRole.PL;
-        boolean dev = currentRole == UserRole.DEV;
-        boolean tester = currentRole == UserRole.TESTER;
-
-        detailAssignButton.setVisible(admin || pl);
-        detailRecommendButton.setVisible(admin || pl);
-        detailStatusButton.setVisible(admin || pl || dev || tester);
-        detailDeleteButton.setVisible(admin || pl);
-        detailCommentButton.setVisible(true);
-        detailAssigneeLabel.setVisible(admin || pl);
-        detailAssigneeCombo.setVisible(admin || pl);
-
-        detailStatusCombo.removeAllItems();
-
-        if (pl) {
-            detailStatusCombo.addItem(IssueStatus.CLOSED);
-        } else if (dev) {
-            detailStatusCombo.addItem(IssueStatus.FIXED);
-        } else if (tester) {
-            detailStatusCombo.addItem(IssueStatus.RESOLVED);
-        } else if (admin) {
-            for (IssueStatus status : IssueStatus.values()) {
-                detailStatusCombo.addItem(status);
-            }
-        }
+        issueActionPolicyRegistry.resolve(currentRole).apply(detailActionView);
     }
 
     @Override
@@ -621,4 +725,63 @@ public class IssuePanel extends JPanel implements IssueView {
         JOptionPane.showMessageDialog(parent, message);
     }
 
+    private class DetailActionView implements IssueActionView {
+
+        @Override
+        public void setAssignSectionVisible(boolean visible) {
+            if (detailAssigneeLabel == null || detailAssigneeCombo == null || detailAssignButton == null) {
+                return;
+            }
+            detailAssigneeLabel.setVisible(visible);
+            detailAssigneeCombo.setVisible(visible);
+            detailAssignButton.setVisible(visible);
+        }
+
+        @Override
+        public void setRecommendButtonVisible(boolean visible) {
+            if (detailRecommendButton == null) {
+                return;
+            }
+            detailRecommendButton.setVisible(visible);
+        }
+
+        @Override
+        public void setStatusSectionVisible(boolean visible) {
+            if (detailStatusLabel == null || detailStatusCombo == null || detailStatusButton == null) {
+                return;
+            }
+            detailStatusLabel.setVisible(visible);
+            detailStatusCombo.setVisible(visible);
+            detailStatusButton.setVisible(visible);
+        }
+
+        @Override
+        public void setDeleteButtonVisible(boolean visible) {
+            if (detailDeleteButton == null) {
+                return;
+            }
+            detailDeleteButton.setVisible(visible);
+        }
+
+        @Override
+        public void setCommentSectionVisible(boolean visible) {
+            if (detailCommentArea == null || detailCommentButton == null) {
+                return;
+            }
+            detailCommentArea.setEnabled(visible);
+            detailCommentArea.setEditable(visible);
+            detailCommentButton.setVisible(visible);
+        }
+
+        @Override
+        public void setStatusOptions(List<IssueStatus> statuses) {
+            if (detailStatusCombo == null) {
+                return;
+            }
+            detailStatusCombo.removeAllItems();
+            for (IssueStatus status : statuses) {
+                detailStatusCombo.addItem(status);
+            }
+        }
+    }
 }
