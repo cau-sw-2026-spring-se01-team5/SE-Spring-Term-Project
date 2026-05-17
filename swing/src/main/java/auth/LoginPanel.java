@@ -22,11 +22,13 @@ public class LoginPanel extends JPanel implements LoginView {
     // 로그인 버튼 클릭 시 실행될 코드 이벤트 핸들러
     // ActionListener를 보통 사용하지만 Runnable을 사용하면 swing에 덜 의존하게 됨
     private Runnable loginHandler;
+
+    // 로그인 성공시 실행될 함수 저장 -> 패널은 UI만 그리니까 이 함수를 몰라도 됨 -> 그냥 등록된 함수만 실행
     private Consumer<Integer> loginSuccessHandler;
 
     public LoginPanel() {
         setLayout(new GridBagLayout()); // 패널 레이아웃을 GridBagLayout으로 지정
-        setBackground(UiTheme.BG);
+        setBackground(UiTheme.BG); // 배경색 지정
         setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40)); // 여백 지정
         GridBagConstraints gbc = new GridBagConstraints(); // GridBagLayout 배치 규칙 지정 위한 객체
         gbc.insets = new Insets(10, 10, 10, 10); // 컴포넌트 간 여백 지정 -> 마진인듯..?
@@ -79,13 +81,15 @@ public class LoginPanel extends JPanel implements LoginView {
         gbc.gridwidth = 2;
         add(loginButton, gbc); // 로그인 버튼 추가
         // 버튼에 이벤트 핸들러 추가
+        // 옵저버 패턴 적용된 부분
         loginButton.addActionListener(e -> {
             if (loginHandler != null) {
-                loginHandler.run();
+                loginHandler.run(); // 핸들러가 등록되어 있고, 버튼 눌렸으면 등록된 핸들러 실행
             }
         });
     }
 
+    // 로그인 성공 후 실행할 함수 등록
     public void setLoginSuccessHandler(Consumer<Integer> loginSuccessHandler) {
         this.loginSuccessHandler = loginSuccessHandler;
     }
