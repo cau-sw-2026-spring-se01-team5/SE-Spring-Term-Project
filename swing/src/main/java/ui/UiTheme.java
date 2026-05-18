@@ -8,16 +8,14 @@ import javax.swing.border.LineBorder;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
 
+/* ui 공통 적용 위함 */
+/* 버튼 디자인, 테이블 디자인, 입력창 디자인, 색상 */
 public final class UiTheme {
 
     public static final Color BG = new Color(245, 247, 250);
     public static final Color CARD_BG = Color.WHITE;
     public static final Color BORDER = new Color(218, 224, 232);
     public static final Color PRIMARY = new Color(59, 96, 176);
-    public static final Color PRIMARY_DARK = new Color(44, 76, 143);
-    public static final Color MUTED = Color.BLACK;
-    public static final Color TEXT = Color.BLACK;
-    public static final Color DANGER = new Color(176, 65, 65);
 
     private UiTheme() {
     }

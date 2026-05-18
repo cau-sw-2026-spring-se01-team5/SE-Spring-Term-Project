@@ -2,6 +2,8 @@ package session;
 
 import enums.user.v1.UserRole;
 
+/* 현재 로그인 사용자와 현재 선택한 프로젝트를 저장하는 객체 */
+/* 프론트 쪽 세션 저장소 */
 public class UserSession {
 
     private Integer userId;
