@@ -12,6 +12,8 @@ import project.v1.Project;
 import session.UserSession;
 import user.v1.User;
 
+// main화면에 필요한 개별 controller를 모두 합침
+// header, issue, user controller 관리
 public class MainController {
 
     private final HeaderController headerController;
@@ -54,6 +56,7 @@ public class MainController {
         );
     }
 
+    // 각 기능 시작
     public void start() {
         userController.applyRole();
         issueController.applyRole();

@@ -8,12 +8,14 @@ import ui.UiTheme;
 import javax.swing.*;
 import java.awt.*;
 
+// main화면에서 필요한 개별 패널들을 모두 조립하는 역할
 public class MainPanel extends JPanel {
 
     private final HeaderPanel headerPanel = new HeaderPanel();
     private final IssuePanel issuePanel = new IssuePanel();
     private final UserPanel userPanel = new UserPanel();
 
+    // 이슈/유저 탭 생성 부분
     private final JTabbedPane tabbedPane = new JTabbedPane();
 
     public MainPanel() {
@@ -40,9 +42,5 @@ public class MainPanel extends JPanel {
 
     public UserPanel userPanel() {
         return userPanel;
-    }
-
-    public void setUserTabEnabled(boolean enabled) {
-        tabbedPane.setEnabledAt(1, enabled);
     }
 }
