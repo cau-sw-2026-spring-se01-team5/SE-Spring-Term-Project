@@ -19,7 +19,7 @@ public class ProjectSelectPanel extends JPanel implements ProjectSelectView {
 
     private final JButton createProjectButton = new JButton("프로젝트 생성");
     private final JButton updateProjectButton = new JButton("프로젝트 제목 수정");
-    private final JButton deleteProjectButton = new JButton("선택 프로젝트 삭제");
+    private final JButton deleteProjectButton = new JButton("프로젝트 삭제");
 
     private final UiEvent loadProjectsEvent = new UiEvent();
     private final UiEvent createProjectEvent = new UiEvent();

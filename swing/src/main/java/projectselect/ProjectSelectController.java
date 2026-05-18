@@ -10,29 +10,31 @@ import project.dto.updateProjectInfo.v1.UpdateProjectInfoInput;
 import project.v1.Project;
 import session.UserSession;
 
+/* 프로젝트 선택 화면 이벤트 담당 컨트롤러 */
+/* 프로젝트 목록 조회, 생성, 수정, 삭제, 입장 */
 public class ProjectSelectController {
 
     private final ProjectSelectView view;
     private final Project projectService;
     private final Auth authService;
     private final UserSession session;
-    private final Runnable enterProjectCallback;
-    private final Runnable logoutCallback;
+    private final Runnable enterProject;
+    private final Runnable logout;
 
     public ProjectSelectController(
             ProjectSelectView view,
             Project projectService,
             Auth authService,
             UserSession session,
-            Runnable enterProjectCallback,
-            Runnable logoutCallback
+            Runnable enterProject,
+            Runnable logout
     ) {
         this.view = view;
         this.projectService = projectService;
         this.authService = authService;
         this.session = session;
-        this.enterProjectCallback = enterProjectCallback;
-        this.logoutCallback = logoutCallback;
+        this.enterProject = enterProject;
+        this.logout = logout;
 
         bind();
     }
@@ -51,6 +53,7 @@ public class ProjectSelectController {
         view.onLogout(this::logout);
     }
 
+    // 프로젝트 리스트 받아오기
     private void loadProjects() {
         var output = projectService.getProjectList(new GetProjectListInput(session.userId()));
 
@@ -62,6 +65,7 @@ public class ProjectSelectController {
         view.setProjects(output.projectList());
     }
 
+    // 프로젝트 생성
     private void createProject() {
         String title = view.getNewProjectTitleInput();
 
@@ -80,6 +84,7 @@ public class ProjectSelectController {
         }
     }
 
+    // 프로젝트 수정
     private void updateProject() {
         Integer projectId = view.getSelectedProjectId();
 
@@ -109,6 +114,7 @@ public class ProjectSelectController {
         }
     }
 
+    // 프로젝트 삭제
     private void deleteProject() {
         Integer projectId = view.getSelectedProjectId();
 
@@ -128,6 +134,7 @@ public class ProjectSelectController {
         }
     }
 
+    // 프로젝트 입장
     private void enterProject() {
         Integer projectId = view.getSelectedProjectId();
 
@@ -138,9 +145,10 @@ public class ProjectSelectController {
 
         String title = findProjectTitle(projectId);
         session.selectProject(projectId, title);
-        enterProjectCallback.run();
+        enterProject.run();
     }
 
+    // 프로젝트 id로 프로젝트 제목 찾기
     private String findProjectTitle(Integer projectId) {
         var output = projectService.getProjectList(new GetProjectListInput(session.userId()));
 
@@ -157,9 +165,10 @@ public class ProjectSelectController {
         return null;
     }
 
+    // 로그아웃
     private void logout() {
         authService.logout();
         session.logout();
-        logoutCallback.run();
+        logout.run();
     }
 }
