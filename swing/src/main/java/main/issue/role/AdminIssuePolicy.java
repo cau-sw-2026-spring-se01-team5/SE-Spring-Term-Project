@@ -5,7 +5,8 @@ import enums.user.v1.UserRole;
 
 import java.util.Arrays;
 
-public class AdminIssueActionPolicy extends BaseIssueActionPolicy {
+/* admin계정 정책 */
+public class AdminIssuePolicy extends BaseIssuePolicy {
 
     @Override
     public boolean supports(UserRole role) {

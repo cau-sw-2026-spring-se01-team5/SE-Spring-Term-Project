@@ -6,6 +6,7 @@ import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.List;
 
+// 이슈 보여줄 테이블
 public class IssueTableModel extends AbstractTableModel {
 
     private final String[] columns = {

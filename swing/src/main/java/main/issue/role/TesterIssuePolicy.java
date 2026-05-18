@@ -5,7 +5,7 @@ import enums.user.v1.UserRole;
 
 import java.util.List;
 
-public class TesterIssueActionPolicy extends BaseIssueActionPolicy {
+public class TesterIssuePolicy extends BaseIssuePolicy {
 
     @Override
     public boolean supports(UserRole role) {
@@ -20,7 +20,7 @@ public class TesterIssueActionPolicy extends BaseIssueActionPolicy {
                 false,
                 true,
                 false,
-                List.of(IssueStatus.RESOLVED)
+                List.of(IssueStatus.RESOLVED, IssueStatus.REOPENED)
         );
     }
 }

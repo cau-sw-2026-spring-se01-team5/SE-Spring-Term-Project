@@ -5,11 +5,12 @@ import enums.user.v1.UserRole;
 
 import java.util.List;
 
-public class DevIssueActionPolicy extends BaseIssueActionPolicy {
+/* 기본 정책 */
+public class DefaultIssuePolicy extends BaseIssuePolicy {
 
     @Override
     public boolean supports(UserRole role) {
-        return role == UserRole.DEV;
+        return role == null;
     }
 
     @Override
@@ -18,9 +19,9 @@ public class DevIssueActionPolicy extends BaseIssueActionPolicy {
                 view,
                 false,
                 false,
-                true,
                 false,
-                List.of(IssueStatus.FIXED)
+                false,
+                List.<IssueStatus>of()
         );
     }
 }

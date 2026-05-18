@@ -9,6 +9,7 @@ import issue.dto.recommendAssignee.v1.RecommendAssigneeOutput;
 
 import java.util.List;
 
+// ui랑 controller이랑 묶는 인터페이스
 public interface IssueView {
 
     record SearchCondition(
