@@ -11,10 +11,11 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.util.List;
 
+// 메인에서 user 탭 들어갔을 때 보여줄 UI
 public class UserPanel extends JPanel implements UserView {
 
-    private final DefaultListModel<UserInfoOutput> userListModel = new DefaultListModel<>();
-    private final JList<UserInfoOutput> userList = new JList<>(userListModel);
+    private final DefaultListModel<UserInfoOutput> userListModel = new DefaultListModel<>(); // 유저 리스트 저장
+    private final JList<UserInfoOutput> userList = new JList<>(userListModel); // 실제 화면에 보여지는 유저 목록
 
     private String newLoginIdInput = "";
     private String newPasswordInput = "";
@@ -44,14 +45,15 @@ public class UserPanel extends JPanel implements UserView {
 
         refreshUserButton.addActionListener(e -> refreshUsersEvent.emit());
         createUserButton.addActionListener(e -> {
-            if (!showCreateUserDialog()) {
+            if (!showCreateUserPopup()) {
                 return;
             }
             createUserEvent.emit();
         });
         deleteUserButton.addActionListener(e -> deleteUserEvent.emit());
 
-        userList.setCellRenderer(new UserCardRenderer());
+        // JList 사용으로 유저 목록을 카드 형태로 표현
+        userList.setCellRenderer(new UserCard());
         userList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         userList.setFixedCellHeight(-1);
         userList.setVisibleRowCount(-1);
@@ -64,6 +66,7 @@ public class UserPanel extends JPanel implements UserView {
         add(userScroll, BorderLayout.CENTER);
     }
 
+    // 유저 목록 화면 갱신
     @Override
     public void setUsers(List<UserInfoOutput> users) {
         userListModel.clear();
@@ -73,27 +76,32 @@ public class UserPanel extends JPanel implements UserView {
         }
     }
 
+    // 유저 생성시 입력한 loginId 값 가져오기
     @Override
     public String getNewLoginIdInput() {
         return newLoginIdInput;
     }
 
+    // 유저 생성시 입력한 pw 값 가져오기
     @Override
     public String getNewPasswordInput() {
         return newPasswordInput;
     }
 
+    // 유저 생성시 입력한 userRole 가져오기
     @Override
     public UserRole getNewUserRoleInput() {
         return newUserRoleInput;
     }
 
+    // 현재 선택된 유저 id 가져오기
     @Override
     public Integer getSelectedTargetUserId() {
         UserInfoOutput selected = userList.getSelectedValue();
         return selected == null ? null : selected.userId();
     }
 
+    // 이벤트 등록 메서드
     @Override
     public void onRefreshUsers(Runnable handler) {
         refreshUsersEvent.subscribe(handler);
@@ -109,6 +117,7 @@ public class UserPanel extends JPanel implements UserView {
         deleteUserEvent.subscribe(handler);
     }
 
+    // 관리자 권한의 경우 표시할 버튼 ui 제어
     @Override
     public void applyAdminPermission(boolean admin) {
         createUserButton.setVisible(admin);
@@ -120,7 +129,8 @@ public class UserPanel extends JPanel implements UserView {
         JOptionPane.showMessageDialog(this, message);
     }
 
-    private boolean showCreateUserDialog() {
+    // 유저 생성 입력 팝업 생성 메서드
+    private boolean showCreateUserPopup() {
         JTextField loginIdField = new JTextField(16);
         JPasswordField passwordField = new JPasswordField(16);
         JComboBox<UserRole> roleComboBox = new JComboBox<>(UserRole.values());
@@ -154,7 +164,8 @@ public class UserPanel extends JPanel implements UserView {
         return true;
     }
 
-    private static class UserCardRenderer implements ListCellRenderer<UserInfoOutput> {
+    // JList로 표현된 유저 리스트를 카드 형태로 랜더링 하기 위함
+    private static class UserCard implements ListCellRenderer<UserInfoOutput> {
 
         @Override
         public Component getListCellRendererComponent(
