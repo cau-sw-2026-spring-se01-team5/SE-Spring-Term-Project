@@ -5,14 +5,16 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter @RequiredArgsConstructor
-public class User {
+public class Comment {
     @Setter
     private Integer id;
     @NonNull
-    private String loginId;
+    private LocalDateTime createdAt;
     @NonNull
-    private String password;
+    private String body;
     @NonNull
-    private Role role;
+    private Integer authorId;
 }
