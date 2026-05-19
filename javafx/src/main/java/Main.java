@@ -1,8 +1,7 @@
-import controller.TestController;
+import app.MainApp;
 
 public class Main {
     public static void main(String[] args) {
-        TestController controller = new TestController();
-        controller.hello();
+        MainApp.main(args);
     }
 }
