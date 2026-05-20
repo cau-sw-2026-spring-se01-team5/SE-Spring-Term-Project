@@ -1,5 +1,6 @@
 package domain;
 
+import enums.user.v1.UserRole;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -14,5 +15,5 @@ public class User {
     @NonNull
     private String password;
     @NonNull
-    private Role role;
+    private UserRole role;
 }
