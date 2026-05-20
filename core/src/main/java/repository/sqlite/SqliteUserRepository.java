@@ -11,6 +11,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 @RequiredArgsConstructor
 public class SqliteUserRepository implements UserRepository {
@@ -19,7 +21,7 @@ public class SqliteUserRepository implements UserRepository {
 
     @Override
     public Integer save(User user, Integer projectId) throws Exception {
-        try{
+        try {
             connection.setAutoCommit(false);
 
             PreparedStatement statement = connection.prepareStatement(
@@ -75,5 +77,33 @@ public class SqliteUserRepository implements UserRepository {
         }
 
         return null;
+    }
+
+    @Override
+    public List<User> byProjectId(Integer projectId) throws Exception {
+        PreparedStatement statement = connection.prepareStatement(
+                "SELECT id, login_id, password, user_role FROM users\n" +
+                        "JOIN project_memberships pm on users.id = pm.user_id\n" +
+                        "WHERE pm.project_id = ?"
+        );
+
+        statement.setInt(1, projectId);
+        ResultSet resultSet = statement.executeQuery();
+
+        List<User> users = new ArrayList<>();
+        while (resultSet.next()) {
+            User user = new User(
+                    resultSet.getString("login_id"),
+                    resultSet.getString("password"),
+                    Role.valueOf(
+                            resultSet.getString("user_role")
+                    )
+            );
+            user.setId(resultSet.getInt("id"));
+
+            users.add(user);
+        }
+
+        return users;
     }
 }
