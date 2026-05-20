@@ -16,24 +16,12 @@ import java.sql.SQLException;
 import static org.junit.jupiter.api.Assertions.*;
 
 
-@Disabled
 class SqliteUserRepositoryTest {
     private static Connection connection;
 
     @BeforeAll
     static void setConnection() throws SQLException {
         connection = DriverManager.getConnection("jdbc:sqlite:test.db");
-
-        PreparedStatement statement = connection.prepareStatement(
-                "CREATE TABLE IF NOT EXISTS users (\n" +
-                        "  id INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
-                        "  login_id TEXT NOT NULL UNIQUE,\n" +
-                        "  password TEXT NOT NULL,\n" +
-                        "  user_role TEXT NOT NULL\n" +
-                        ");"
-        );
-
-        statement.execute();
     }
 
     @Test
@@ -41,21 +29,18 @@ class SqliteUserRepositoryTest {
         UserRepository repository = new SqliteUserRepository(connection);
 
         User user = new User("username", "password", Role.ADMIN);
-        Integer userId = repository.save(user);
+        Integer userId = repository.save(user, 1);
         assertNotNull(userId);
     }
 
     @Test
-    void saveAndLoad() throws Exception {
+    void load() throws Exception {
         UserRepository repository = new SqliteUserRepository(connection);
 
-        User user = new User("username", "password", Role.ADMIN);
-        Integer userId = repository.save(user);
+        User loadedUser = repository.load(2);
 
-        User loadedUser = repository.load(userId);
-
-        assertEquals(user.getLoginId(), loadedUser.getLoginId());
-    }
+        assertEquals("username", loadedUser.getLoginId());
+}
 
     @AfterAll
     static void closeConnection() throws SQLException {

@@ -18,24 +18,39 @@ public class SqliteUserRepository implements UserRepository {
     private Connection connection;
 
     @Override
-    public Integer save(User user) throws Exception {
-        try (PreparedStatement statement = connection.prepareStatement(
-                "INSERT INTO users(login_id, password, user_role) VALUES (?, ?, ?)",
-                Statement.RETURN_GENERATED_KEYS
-        )) {
+    public Integer save(User user, Integer projectId) throws Exception {
+        try{
+            connection.setAutoCommit(false);
+
+            PreparedStatement statement = connection.prepareStatement(
+                    "INSERT INTO users(login_id, password, user_role) VALUES (?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS
+            );
             statement.setString(1, user.getLoginId());
             statement.setString(2, user.getPassword());
             statement.setString(3, user.getRole().name());
             statement.executeUpdate();
 
-            try (ResultSet keys = statement.getGeneratedKeys()) {
-                if (keys.next()) {
-                    return keys.getInt(1);
-                }
+            ResultSet keys = statement.getGeneratedKeys();
+            if (!keys.next()) {
+                return null;
             }
-        }
 
-        return null;
+            Integer userId = keys.getInt(1);
+
+            PreparedStatement membershipStatement = connection.prepareStatement(
+                    "INSERT INTO project_memberships(user_id, project_id) VALUES (?, ?)"
+            );
+            membershipStatement.setInt(1, userId);
+            membershipStatement.setInt(2, projectId);
+            membershipStatement.executeUpdate();
+
+            connection.commit();
+
+            return userId;
+        } finally {
+            connection.setAutoCommit(true);
+        }
     }
 
     @Override

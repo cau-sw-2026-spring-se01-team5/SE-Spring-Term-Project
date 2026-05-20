@@ -8,6 +8,7 @@ import repository.ProjectRepository;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 
 @RequiredArgsConstructor
 public class SqliteProjectRepository implements ProjectRepository {
@@ -17,7 +18,8 @@ public class SqliteProjectRepository implements ProjectRepository {
     @Override
     public Integer save(Project project) throws Exception {
         PreparedStatement statement = connection.prepareStatement(
-                "INSERT INTO projects(name) VALUES (?)"
+                "INSERT INTO projects(name) VALUES (?)",
+                Statement.RETURN_GENERATED_KEYS
         );
 
         statement.setString(1, project.getName());
