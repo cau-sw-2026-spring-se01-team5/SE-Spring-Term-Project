@@ -1,7 +1,7 @@
 package repository.sqlite;
 
-import domain.Role;
 import domain.User;
+import enums.user.v1.UserRole;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import repository.UserRepository;
@@ -9,7 +9,6 @@ import repository.UserRepository;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -66,7 +65,7 @@ public class SqliteUserRepository implements UserRepository {
                 User user = new User(
                         resultSet.getString("login_id"),
                         resultSet.getString("password"),
-                        Role.valueOf(
+                        UserRole.valueOf(
                                 resultSet.getString("user_role")
                         )
                 );
@@ -95,7 +94,7 @@ public class SqliteUserRepository implements UserRepository {
             User user = new User(
                     resultSet.getString("login_id"),
                     resultSet.getString("password"),
-                    Role.valueOf(
+                    UserRole.valueOf(
                             resultSet.getString("user_role")
                     )
             );

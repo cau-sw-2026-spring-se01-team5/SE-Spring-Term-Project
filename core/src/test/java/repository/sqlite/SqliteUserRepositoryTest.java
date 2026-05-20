@@ -1,7 +1,7 @@
 package repository.sqlite;
 
-import domain.Role;
 import domain.User;
+import enums.user.v1.UserRole;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
@@ -10,7 +10,6 @@ import repository.UserRepository;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -30,7 +29,7 @@ class SqliteUserRepositoryTest {
     void save() throws Exception {
         UserRepository repository = new SqliteUserRepository(connection);
 
-        User user = new User("username", "password", Role.ADMIN);
+        User user = new User("username", "password", UserRole.ADMIN);
         Integer userId = repository.save(user, 1);
         assertNotNull(userId);
     }
