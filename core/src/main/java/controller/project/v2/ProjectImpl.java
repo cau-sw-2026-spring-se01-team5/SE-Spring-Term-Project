@@ -30,7 +30,7 @@ public class ProjectImpl implements Project {
         try {
             domain.User requester = userRepository.load(input.requesterUserId());
             if (requester.getRole() != UserRole.ADMIN) {
-                return new CreateProjectOutput(false, null, "ADMIN만 프로젝트를 생성할 수 있다");
+                return new CreateProjectOutput(false, null, "ADMIN만 프로젝트를 생성할 수 있습니다.");
             }
         } catch (Exception e) {
             return new CreateProjectOutput(false, null, e.getMessage());
@@ -38,7 +38,7 @@ public class ProjectImpl implements Project {
 
         try {
             Integer projectId = projectRepository.save(new domain.Project(input.title()));
-            return new CreateProjectOutput(true, projectId, null);
+            return new CreateProjectOutput(true, projectId, "프로젝트 생성 성공");
         } catch (Exception e) {
             return new CreateProjectOutput(false, null, e.getMessage());
         }
@@ -52,7 +52,7 @@ public class ProjectImpl implements Project {
             for (domain.Project project : projects) {
                 projectInfoOutputs.add(new ProjectInfoOutput(project.getId(), project.getName()));
             }
-            return new GetProjectListOutput(true, null, projectInfoOutputs);
+            return new GetProjectListOutput(true, "프로젝트 목록 조회 성공", projectInfoOutputs);
         } catch (Exception e) {
             return new GetProjectListOutput(false, e.getMessage(), null);
         }
@@ -63,7 +63,7 @@ public class ProjectImpl implements Project {
         try {
             domain.User requester = userRepository.load(input.requesterUserId());
             if (requester.getRole() != UserRole.ADMIN) {
-                return new UpdateProjectInfoOutput(false, "ADMIN만 프로젝트를 수정할 수 있다");
+                return new UpdateProjectInfoOutput(false, "ADMIN만 프로젝트를 수정할 수 있습니다.");
             }
         } catch (Exception e) {
             return new UpdateProjectInfoOutput(false, e.getMessage());
@@ -73,7 +73,7 @@ public class ProjectImpl implements Project {
             domain.Project project = projectRepository.load(input.projectId());
             project.setName(input.title());
             projectRepository.update(project);
-            return new UpdateProjectInfoOutput(true, null);
+            return new UpdateProjectInfoOutput(true, "프로젝트 정보 수정 성공");
         } catch (Exception e) {
             return new UpdateProjectInfoOutput(false, e.getMessage());
         }
@@ -84,7 +84,7 @@ public class ProjectImpl implements Project {
         try {
             domain.User requester = userRepository.load(input.requesterUserId());
             if (requester.getRole() != UserRole.ADMIN) {
-                return new DeleteProjectOutput(false, "ADMIN만 프로젝트를 삭제할 수 있다");
+                return new DeleteProjectOutput(false, "ADMIN만 프로젝트를 삭제할 수 있습니다.");
             }
         } catch (Exception e) {
             return new DeleteProjectOutput(false, e.getMessage());
@@ -92,7 +92,7 @@ public class ProjectImpl implements Project {
 
         try {
             projectRepository.delete(input.projectId());
-            return new DeleteProjectOutput(true, null);
+            return new DeleteProjectOutput(true, "프로젝트 삭제 성공");
         } catch (Exception e) {
             return new DeleteProjectOutput(false, e.getMessage());
         }

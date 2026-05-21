@@ -29,7 +29,7 @@ public class UserImpl implements User {
                 return new CreateUserOutput(
                         false,
                         null,
-                        "ADMIN만 계정을 생성할 수 있다"
+                        "ADMIN만 계정을 생성할 수 있습니다."
                 );
             }
         } catch (Exception e) {
@@ -53,7 +53,7 @@ public class UserImpl implements User {
             return new CreateUserOutput(
                     true,
                     userId,
-                    null
+                    "계정 생성 성공"
             );
         } catch (Exception e) {
             String message = e.getMessage();
@@ -79,7 +79,7 @@ public class UserImpl implements User {
                         input.projectId()
                 ));
             }
-            return new GetProjectUserListOutput(true, null, userInfoOutputs);
+            return new GetProjectUserListOutput(true, "유저 목록 조회 성공", userInfoOutputs);
         } catch (Exception e) {
             return new GetProjectUserListOutput(false, e.getMessage(), null);
         }
@@ -92,7 +92,7 @@ public class UserImpl implements User {
             if (requester.getRole() != UserRole.ADMIN) {
                 return new DeleteUserOutput(
                         false,
-                        "ADMIN만 계정을 삭제할 수 있다"
+                        "ADMIN만 계정을 삭제할 수 있습니다."
                 );
             }
         } catch (Exception e) {
@@ -105,7 +105,7 @@ public class UserImpl implements User {
         try {
             repository.delete(input.targetUserId());
 
-            return new DeleteUserOutput(true, null);
+            return new DeleteUserOutput(true, "계정 삭제 성공");
         } catch (Exception e) {
             return new DeleteUserOutput(false, e.getMessage());
         }
