@@ -9,6 +9,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 @RequiredArgsConstructor
 public class SqliteProjectRepository implements ProjectRepository {
@@ -50,6 +52,22 @@ public class SqliteProjectRepository implements ProjectRepository {
         }
 
         return null;
+    }
+
+    @Override
+    public List<Project> list() throws Exception {
+        PreparedStatement statement = connection.prepareStatement(
+                "SELECT id, name FROM projects"
+        );
+        ResultSet resultSet = statement.executeQuery();
+
+        List<Project> projects = new ArrayList<>();
+        while (resultSet.next()) {
+            Project project = new Project(resultSet.getString("name"));
+            project.setId(resultSet.getInt("id"));
+            projects.add(project);
+        }
+        return projects;
     }
 
     @Override
