@@ -45,4 +45,17 @@ class SqliteProjectRepositoryTest {
         Project project = repository.load(2);
         assertNull(project);
     }
+    @Test
+    void update() throws Exception {
+        Connection connection = DriverManager.getConnection("jdbc:sqlite:test.db");
+
+        ProjectRepository repository = new SqliteProjectRepository(connection);
+        Project project = repository.load(1);
+        project.setName("project1.1");
+
+        repository.update(project);
+
+        Project updated = repository.load(1);
+        assertEquals("project1.1", updated.getName());
+    }
 }

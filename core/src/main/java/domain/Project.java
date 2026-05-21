@@ -6,9 +6,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Getter
+@Setter
 @RequiredArgsConstructor
 public class Project {
-    @Setter
     private Integer id;
     @NonNull
     private String name;

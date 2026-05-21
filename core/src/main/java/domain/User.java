@@ -6,9 +6,8 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
-@Getter @RequiredArgsConstructor
+@Getter @Setter @RequiredArgsConstructor
 public class User {
-    @Setter
     private Integer id;
     @NonNull
     private String loginId;

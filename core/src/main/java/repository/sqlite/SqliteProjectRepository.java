@@ -60,4 +60,15 @@ public class SqliteProjectRepository implements ProjectRepository {
         statement.setInt(1, id);
         statement.executeUpdate();
     }
+
+    @Override
+    public void update(Project project) throws Exception {
+        PreparedStatement statement = connection.prepareStatement(
+                "UPDATE projects SET name = ? WHERE id = ?"
+        );
+        statement.setString(1, project.getName());
+        statement.setInt(2, project.getId());
+
+        statement.executeUpdate();
+    }
 }
