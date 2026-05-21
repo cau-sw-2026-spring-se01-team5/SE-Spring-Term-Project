@@ -2,7 +2,6 @@ package issue.dto.getIssueDetail.v2;
 
 import enums.issue.v1.IssuePriority;
 import enums.issue.v1.IssueStatus;
-import issue.dto.getIssueDetail.v1.CommentOutput;
 
 import java.time.LocalDateTime;
 import java.util.List;
