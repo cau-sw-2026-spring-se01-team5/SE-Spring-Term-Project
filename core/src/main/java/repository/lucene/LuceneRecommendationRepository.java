@@ -76,7 +76,9 @@ public class LuceneRecommendationRepository implements RecommendationRepository 
             Set<Integer> result = new LinkedHashSet<>();
             for (ScoreDoc sd : topDocs.scoreDocs) {
                 Document doc = searcher.storedFields().document(sd.doc);
-                result.add(doc.getField("fixerId").numericValue().intValue());
+                Integer fixerId = doc.getField("fixerId").numericValue().intValue();
+                result.add(fixerId);
+                System.out.println("[recommend : " + issueId.toString() + "] " + fixerId.toString());
             }
             return new ArrayList<>(result);
         }
