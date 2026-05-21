@@ -199,7 +199,11 @@ public class IssueImpl implements Issue {
 
     @Override
     public RecommendAssigneeOutput recommendAssignees(RecommendAssigneeInput input) {
-        return null;
+        return new RecommendAssigneeOutput(
+                false,
+                "미구현",
+                List.of()
+        );
     }
 
     @Override
