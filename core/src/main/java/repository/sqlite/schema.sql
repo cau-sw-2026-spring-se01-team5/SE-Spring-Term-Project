@@ -34,3 +34,13 @@ CREATE TABLE IF NOT EXISTS issues (
     FOREIGN KEY (assignee_id) REFERENCES users(id),
     FOREIGN KEY (fixer_id) REFERENCES users(id)
 );
+
+CREATE TABLE IF NOT EXISTS comments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    issue_id INTEGER NOT NULL,
+    author_id INTEGER NOT NULL,
+    body TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    FOREIGN KEY (issue_id) REFERENCES issues(id) ON DELETE CASCADE,
+    FOREIGN KEY (author_id) REFERENCES users(id)
+);

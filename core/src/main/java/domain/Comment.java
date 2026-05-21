@@ -17,4 +17,6 @@ public class Comment {
     private String body;
     @NonNull
     private Integer authorId;
+    @NonNull
+    private Integer issueId;
 }
