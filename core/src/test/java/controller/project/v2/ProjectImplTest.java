@@ -7,8 +7,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import project.dto.createProject.v1.CreateProjectOutput;
 import project.dto.createProject.v2.CreateProjectInput;
+import project.dto.deleteProject.v1.DeleteProjectInput;
+import project.dto.deleteProject.v1.DeleteProjectOutput;
+import project.dto.getProjectList.v1.GetProjectListInput;
+import project.dto.getProjectList.v1.GetProjectListOutput;
+import project.dto.updateProjectInfo.v1.UpdateProjectInfoInput;
+import project.dto.updateProjectInfo.v1.UpdateProjectInfoOutput;
 import repository.ProjectRepository;
 import repository.UserRepository;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -35,6 +43,8 @@ class ProjectImplTest {
         when(userRepository.load(admin.getId())).thenReturn(admin);
         when(userRepository.load(nonAdmin.getId())).thenReturn(nonAdmin);
         when(projectRepository.save(any())).thenReturn(newProject.getId());
+        when(projectRepository.list()).thenReturn(List.of(newProject));
+        when(projectRepository.load(newProject.getId())).thenReturn(newProject);
 
         projectImpl = new ProjectImpl(userRepository, projectRepository);
     }
@@ -55,5 +65,16 @@ class ProjectImplTest {
         );
 
         assertEquals(false, output.success());
+    }
+
+    @Test
+    void getProjectList() {
+        GetProjectListOutput output = projectImpl.getProjectList(
+                new GetProjectListInput(admin.getId())
+        );
+
+        assertEquals(true, output.success());
+        assertEquals(1, output.projectList().size());
+        assertEquals(newProject.getId(), output.projectList().get(0).projectId());
     }
 }
