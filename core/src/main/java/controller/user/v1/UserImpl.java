@@ -10,7 +10,11 @@ import user.dto.deleteUser.v1.DeleteUserInput;
 import user.dto.deleteUser.v1.DeleteUserOutput;
 import user.dto.getProjectUserList.v1.GetProjectUserListInput;
 import user.dto.getProjectUserList.v1.GetProjectUserListOutput;
+import user.dto.getProjectUserList.v1.UserInfoOutput;
 import user.v1.User;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RequiredArgsConstructor
 public class UserImpl implements User {
@@ -64,11 +68,46 @@ public class UserImpl implements User {
 
     @Override
     public GetProjectUserListOutput getProjectUserList(GetProjectUserListInput input) {
-        return null;
+        try {
+            List<domain.User> users = repository.byProjectId(input.projectId());
+            List<UserInfoOutput> userInfoOutputs = new ArrayList<>();
+            for (domain.User user : users) {
+                userInfoOutputs.add(new UserInfoOutput(
+                        user.getId(),
+                        user.getLoginId(),
+                        user.getRole(),
+                        input.projectId()
+                ));
+            }
+            return new GetProjectUserListOutput(true, null, userInfoOutputs);
+        } catch (Exception e) {
+            return new GetProjectUserListOutput(false, e.getMessage(), null);
+        }
     }
 
     @Override
     public DeleteUserOutput deleteUser(DeleteUserInput input) {
-        return null;
+        try {
+            domain.User requester = repository.load(input.requesterUserId());
+            if (requester.getRole() != UserRole.ADMIN) {
+                return new DeleteUserOutput(
+                        false,
+                        "ADMIN만 계정을 삭제할 수 있다"
+                );
+            }
+        } catch (Exception e) {
+            return new DeleteUserOutput(
+                    false,
+                    e.getMessage()
+            );
+        }
+
+        try {
+            repository.delete(input.targetUserId());
+
+            return new DeleteUserOutput(true, null);
+        } catch (Exception e) {
+            return new DeleteUserOutput(false, e.getMessage());
+        }
     }
 }
