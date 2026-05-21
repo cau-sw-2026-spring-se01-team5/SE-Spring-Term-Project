@@ -51,4 +51,13 @@ public class SqliteProjectRepository implements ProjectRepository {
 
         return null;
     }
+
+    @Override
+    public void delete(Integer id) throws Exception {
+        PreparedStatement statement = connection.prepareStatement(
+                "DELETE FROM projects WHERE id = ?"
+        );
+        statement.setInt(1, id);
+        statement.executeUpdate();
+    }
 }

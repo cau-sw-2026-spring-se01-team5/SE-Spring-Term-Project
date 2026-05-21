@@ -21,7 +21,7 @@ class SqliteProjectRepositoryTest {
 
         ProjectRepository repository = new SqliteProjectRepository(connection);
 
-        Project project = new Project("project1");
+        Project project = new Project("project2");
         Integer id = repository.save(project);
         assertNotNull(id);
     }
@@ -34,5 +34,15 @@ class SqliteProjectRepositoryTest {
 
         Project project = repository.load(1);
         assertNotNull(project);
+    }
+    @Test
+    void delete() throws Exception {
+        Connection connection = DriverManager.getConnection("jdbc:sqlite:test.db");
+
+        ProjectRepository repository = new SqliteProjectRepository(connection);
+
+        repository.delete(2);
+        Project project = repository.load(2);
+        assertNull(project);
     }
 }
