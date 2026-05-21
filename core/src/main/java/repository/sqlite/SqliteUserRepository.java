@@ -105,4 +105,13 @@ public class SqliteUserRepository implements UserRepository {
 
         return users;
     }
+
+    @Override
+    public void delete(Integer id) throws Exception {
+        PreparedStatement statement = connection.prepareStatement(
+                "DELETE FROM users WHERE id = ?"
+        );
+        statement.setInt(1, id);
+        statement.executeUpdate();
+    }
 }
