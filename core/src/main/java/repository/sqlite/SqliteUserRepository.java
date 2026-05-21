@@ -79,6 +79,26 @@ public class SqliteUserRepository implements UserRepository {
     }
 
     @Override
+    public User byLoginId(String loginId) throws Exception {
+        try (PreparedStatement statement = connection.prepareStatement(
+                "SELECT id, login_id, password, user_role FROM users WHERE login_id = ?"
+        )) {
+            statement.setString(1, loginId);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                User user = new User(
+                        resultSet.getString("login_id"),
+                        resultSet.getString("password"),
+                        UserRole.valueOf(resultSet.getString("user_role"))
+                );
+                user.setId(resultSet.getInt("id"));
+                return user;
+            }
+        }
+        return null;
+    }
+
+    @Override
     public List<User> byProjectId(Integer projectId) throws Exception {
         PreparedStatement statement = connection.prepareStatement(
                 "SELECT id, login_id, password, user_role FROM users\n" +
