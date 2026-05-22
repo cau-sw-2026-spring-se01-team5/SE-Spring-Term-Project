@@ -92,26 +92,7 @@ public class ProjectImpl implements Project {
         }
 
         try {
-            /*
-             * 수정 전 코드:
-             * projectRepository.delete(input.projectId());
-             * return new DeleteProjectOutput(true, "프로젝트 삭제 성공");
-             */
-
-            // 여기 수정: 프로젝트 삭제 전에 해당 프로젝트에 속한 계정 목록을 먼저 조회한다.
-            // 프로젝트를 먼저 삭제하면 membership 정보가 사라질 수 있으므로 삭제 대상 계정을 미리 확보한다.
-            List<domain.User> projectUsers = userRepository.byProjectId(input.projectId());
-
-            // 여기 수정: 프로젝트 자체를 삭제한다.
             projectRepository.delete(input.projectId());
-
-            // 여기 수정: admin은 전역 관리자 계정이므로 삭제하지 않고,
-            // 해당 프로젝트에 속해 있던 PL/dev/tester 계정만 users 테이블에서 함께 삭제한다.
-            for (domain.User projectUser : projectUsers) {
-                if (projectUser.getRole() != UserRole.ADMIN) {
-                    userRepository.delete(projectUser.getId());
-                }
-            }
             return new DeleteProjectOutput(true, "프로젝트 삭제 성공");
         } catch (Exception e) {
             return new DeleteProjectOutput(false, e.getMessage());
