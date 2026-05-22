@@ -44,6 +44,8 @@ import user.dto.deleteUser.v1.DeleteUserOutput;
 import user.dto.getProjectUserList.v1.GetProjectUserListInput;
 import user.dto.getProjectUserList.v1.GetProjectUserListOutput;
 import user.dto.getProjectUserList.v1.UserInfoOutput;
+import user.dto.getUserInfo.v1.GetUserInfoInput;
+import user.dto.getUserInfo.v1.GetUserInfoOutput;
 import user.v1.User;
 
 import java.time.LocalDateTime;
@@ -218,6 +220,29 @@ public class MockBackend implements Auth, Project, User, Issue, RoleResolver {
         users.remove(input.targetUserId());
 
         return new DeleteUserOutput(true, "유저 삭제 성공");
+    }
+
+    @Override
+    public GetUserInfoOutput getUserInfo(GetUserInfoInput input) {
+        MockUser user = users.get(input.userId());
+        if (user == null) {
+            return new GetUserInfoOutput(
+                    false,
+                    null,
+                    null,
+                    null,
+                    input.projectId(),
+                    "유저를 찾을 수 없습니다."
+            );
+        }
+        return new GetUserInfoOutput(
+                true,
+                user.userId,
+                user.loginId,
+                user.role,
+                user.projectId,
+                "유저 정보 조회 성공"
+        );
     }
 
     @Override
