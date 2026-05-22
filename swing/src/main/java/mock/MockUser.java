@@ -27,7 +27,7 @@ public class MockUser implements User {
     @Override
     public CreateUserOutput createUser(CreateUserInput input) {
         if (!isAdmin(input.requesterUserId())) {
-            return new CreateUserOutput(false, null, "Admin만 유저를 생성할 수 있습니다.");
+            return new CreateUserOutput(false, null, "ADMIN만 계정을 생성할 수 있습니다.");
         }
 
         if (input.loginId() == null || input.loginId().isBlank()) {
@@ -55,7 +55,7 @@ public class MockUser implements User {
                 )
         );
 
-        return new CreateUserOutput(true, userId, "유저 생성 성공");
+        return new CreateUserOutput(true, userId, "계정 생성 성공");
     }
 
     @Override
@@ -78,7 +78,7 @@ public class MockUser implements User {
     @Override
     public DeleteUserOutput deleteUser(DeleteUserInput input) {
         if (!isAdmin(input.requesterUserId())) {
-            return new DeleteUserOutput(false, "Admin만 유저를 삭제할 수 있습니다.");
+            return new DeleteUserOutput(false, "ADMIN만 계정을 삭제할 수 있습니다.");
         }
 
         if (!database.users().containsKey(input.targetUserId())) {
@@ -87,7 +87,7 @@ public class MockUser implements User {
 
         database.users().remove(input.targetUserId());
 
-        return new DeleteUserOutput(true, "유저 삭제 성공");
+        return new DeleteUserOutput(true, "계정 삭제 성공");
     }
 
     @Override
