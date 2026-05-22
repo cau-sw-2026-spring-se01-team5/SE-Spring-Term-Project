@@ -6,6 +6,7 @@ import auth.v1.Auth;
 import controller.auth.v1.AuthImpl;
 import controller.issue.v1.IssueImpl;
 import controller.project.v1.ProjectImpl;
+import controller.statistics.v1.StatisticsImpl;
 import controller.user.v1.RoleResolverImpl;
 import controller.user.v1.UserImpl;
 import enums.issue.v1.IssuePriority;
@@ -28,6 +29,9 @@ import repository.sqlite.SqliteCommentRepository;
 import repository.sqlite.SqliteIssueRepository;
 import repository.sqlite.SqliteProjectRepository;
 import repository.sqlite.SqliteUserRepository;
+import statistics.dto.countByStatus.v1.CountByStatusInput;
+import statistics.dto.getDailyIssueCounts.v1.GetDailyIssueCountsInput;
+import statistics.v1.Statistics;
 import user.dto.createUser.v1.CreateUserInput;
 import user.dto.getUserInfo.v1.GetUserInfoInput;
 import user.v1.RoleResolver;
@@ -149,6 +153,46 @@ class SwingInterfaceJunitTest {
         assertTrue(list.issues().stream().anyMatch(i -> i.issueId().equals(register.issueId())));
     }
 
+    @Test
+    void statisticsTest() throws Exception {
+        AppServices services = concatServices(tempDir.resolve("it-4.db"));
+
+        Auth auth = services.auth();
+        User user = services.user();
+        Issue issue = services.issue();
+        Statistics statistics = services.statistics();
+
+        LoginOutput adminLogin = auth.login(new LoginInput("admin", "1234"));
+        assertTrue(adminLogin.success());
+
+        var testerCreate = user.createUser(new CreateUserInput(
+                adminLogin.userId(),
+                "tester-stat",
+                "1234",
+                UserRole.TESTER,
+                1
+        ));
+        assertTrue(testerCreate.success());
+
+        var register = issue.registerIssue(new RegisterIssueInput(
+                1,
+                "통계 테스트 이슈",
+                "상태별/일별 통계 검증용",
+                IssuePriority.MAJOR,
+                testerCreate.createdUserId()
+        ));
+        assertTrue(register.success());
+
+        var countOutput = statistics.countByStatus(new CountByStatusInput(1, enums.issue.v1.IssueStatus.NEW));
+        assertTrue(countOutput.success());
+        assertTrue(countOutput.count() >= 1);
+
+        var dailyOutput = statistics.getDailyIssueCounts(new GetDailyIssueCountsInput(1));
+        assertTrue(dailyOutput.success());
+        assertNotNull(dailyOutput.counts());
+        assertFalse(dailyOutput.counts().isEmpty());
+    }
+
     // 테스트에 필요한 서비스 합치는 메서드
     private static AppServices concatServices(Path dbPath) throws Exception {
         Connection connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath.toAbsolutePath());
@@ -171,8 +215,9 @@ class SwingInterfaceJunitTest {
                 commentRepository,
                 recommendationRepository
         );
+        Statistics statistics = new StatisticsImpl(issueRepository);
 
-        return new AppServices(auth, project, user, roleResolver, issue);
+        return new AppServices(auth, project, user, roleResolver, issue, statistics);
     }
 
     // 테스트 db에 테이블 만드는 메서드

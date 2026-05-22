@@ -37,7 +37,8 @@ public class Main {
                         services.auth(),
                         services.project(),
                         services.user(),
-                        services.issue()
+                        services.issue(),
+                        services.statistics()
                 );
 
                 controller.start();

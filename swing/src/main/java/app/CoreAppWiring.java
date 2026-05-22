@@ -4,6 +4,7 @@ import auth.v1.Auth;
 import controller.auth.v1.AuthImpl;
 import controller.issue.v1.IssueImpl;
 import controller.project.v1.ProjectImpl;
+import controller.statistics.v1.StatisticsImpl;
 import controller.user.v1.RoleResolverImpl;
 import controller.user.v1.UserImpl;
 import issue.v1.Issue;
@@ -18,6 +19,7 @@ import repository.sqlite.SqliteCommentRepository;
 import repository.sqlite.SqliteIssueRepository;
 import repository.sqlite.SqliteProjectRepository;
 import repository.sqlite.SqliteUserRepository;
+import statistics.v1.Statistics;
 import user.v1.RoleResolver;
 import user.v1.User;
 
@@ -52,8 +54,9 @@ public class CoreAppWiring implements AppWiring {
                 commentRepository,
                 recommendationRepository
         );
+        Statistics statistics = new StatisticsImpl(issueRepository);
 
-        return new AppServices(auth, project, user, roleResolver, issue);
+        return new AppServices(auth, project, user, roleResolver, issue, statistics);
     }
 
     private static void initSchema(Connection connection) throws Exception {
