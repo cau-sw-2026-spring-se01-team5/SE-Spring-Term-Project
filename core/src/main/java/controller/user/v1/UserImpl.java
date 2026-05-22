@@ -11,6 +11,8 @@ import user.dto.deleteUser.v1.DeleteUserOutput;
 import user.dto.getProjectUserList.v1.GetProjectUserListInput;
 import user.dto.getProjectUserList.v1.GetProjectUserListOutput;
 import user.dto.getProjectUserList.v1.UserInfoOutput;
+import user.dto.getUserInfo.v1.GetUserInfoInput;
+import user.dto.getUserInfo.v1.GetUserInfoOutput;
 import user.v1.User;
 
 import java.util.ArrayList;
@@ -108,6 +110,41 @@ public class UserImpl implements User {
             return new DeleteUserOutput(true, "계정 삭제 성공");
         } catch (Exception e) {
             return new DeleteUserOutput(false, e.getMessage());
+        }
+    }
+
+    @Override
+    public GetUserInfoOutput getUserInfo(GetUserInfoInput input) {
+        try {
+            domain.User user = repository.load(input.userId());
+            if (user == null) {
+                return new GetUserInfoOutput(
+                        false,
+                        null,
+                        null,
+                        null,
+                        input.projectId(),
+                        "유저를 찾을 수 없습니다."
+                );
+            }
+
+            return new GetUserInfoOutput(
+                    true,
+                    user.getId(),
+                    user.getLoginId(),
+                    user.getRole(),
+                    input.projectId(),
+                    "유저 정보 조회 성공"
+            );
+        } catch (Exception e) {
+            return new GetUserInfoOutput(
+                    false,
+                    null,
+                    null,
+                    null,
+                    input.projectId(),
+                    e.getMessage()
+            );
         }
     }
 }
