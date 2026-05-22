@@ -28,19 +28,21 @@ import lombok.RequiredArgsConstructor;
 import repository.CommentRepository;
 import repository.IssueFilter;
 import repository.IssueRepository;
+import repository.RecommendationRepository;
 import repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @RequiredArgsConstructor
 public class IssueImpl implements Issue {
     @NonNull private UserRepository userRepository;
     @NonNull private IssueRepository issueRepository;
     @NonNull private CommentRepository commentRepository;
+    @NonNull private RecommendationRepository recommendationRepository;
 
     @Override
     public RegisterIssueOutput registerIssue(RegisterIssueInput input) {
@@ -199,11 +201,17 @@ public class IssueImpl implements Issue {
 
     @Override
     public RecommendAssigneeOutput recommendAssignees(RecommendAssigneeInput input) {
-        return new RecommendAssigneeOutput(
-                false,
-                "미구현",
-                List.of()
-        );
+        try {
+            recommendationRepository.index(input.projectId());
+            List<Integer> userIds = recommendationRepository.recommend(input.issueId());
+            List<RecommendedAssigneeOutput> candidates = new ArrayList<>();
+            for (int i = 0; i < userIds.size(); i++) {
+                candidates.add(new RecommendedAssigneeOutput(loginIdOf(userIds.get(i)), i + 1));
+            }
+            return new RecommendAssigneeOutput(true, "추천 성공", candidates);
+        } catch (Exception e) {
+            return new RecommendAssigneeOutput(false, e.getMessage(), List.of());
+        }
     }
 
     @Override

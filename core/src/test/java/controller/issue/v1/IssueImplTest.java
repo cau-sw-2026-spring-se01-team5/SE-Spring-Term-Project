@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import repository.CommentRepository;
 import repository.IssueRepository;
+import repository.RecommendationRepository;
 import repository.UserRepository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,6 +47,7 @@ class IssueImplTest {
         UserRepository userRepository = mock(UserRepository.class);
         IssueRepository issueRepository = mock(IssueRepository.class);
         CommentRepository commentRepository = mock(CommentRepository.class);
+        RecommendationRepository recommendationRepository = mock(RecommendationRepository.class);
 
         when(userRepository.load(tester.getId())).thenReturn(tester);
         when(userRepository.load(dev.getId())).thenReturn(dev);
@@ -53,7 +55,7 @@ class IssueImplTest {
         when(issueRepository.save(any())).thenReturn(issue.getId());
         when(issueRepository.load(issue.getId())).thenReturn(issue);
 
-        issueImpl = new IssueImpl(userRepository, issueRepository, commentRepository);
+        issueImpl = new IssueImpl(userRepository, issueRepository, commentRepository, recommendationRepository);
     }
 
     @Test
