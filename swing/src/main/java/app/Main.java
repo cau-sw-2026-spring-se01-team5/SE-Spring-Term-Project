@@ -4,6 +4,7 @@ import auth.v1.Auth;
 import controller.auth.v1.AuthImpl;
 import controller.issue.v1.IssueImpl;
 import controller.project.v1.ProjectImpl;
+import controller.user.v1.RoleResolverImpl;
 import controller.user.v1.UserImpl;
 import issue.v1.Issue;
 import project.v1.Project;
@@ -19,6 +20,7 @@ import repository.sqlite.SqliteProjectRepository;
 import repository.sqlite.SqliteUserRepository;
 import session.UserSession;
 import user.v1.User;
+import user.v1.RoleResolver;
 
 import javax.swing.*;
 import java.nio.file.Files;
@@ -51,6 +53,7 @@ public class Main {
                 Auth auth = new AuthImpl(userRepository);
                 Project project = new ProjectImpl(userRepository, projectRepository);
                 User user = new UserImpl(userRepository);
+                RoleResolver roleResolver = new RoleResolverImpl(userRepository);
                 Issue issue = new IssueImpl(
                         userRepository,
                         issueRepository,
@@ -63,6 +66,7 @@ public class Main {
                 // Auth auth = new MockAuth(database);
                 // Project project = new MockProject(database);
                 // User user = new MockUser(database);
+                // RoleResolver roleResolver = new MockRoleResolver(database);
                 // Issue issue = new MockIssue(database);
 
                 // 현재 로그인한 사용자 상태를 저장하는 세션 객체
@@ -78,6 +82,7 @@ public class Main {
                 AppController controller = new AppController(
                         frame,
                         session,
+                        roleResolver,
                         auth,
                         project,
                         user,

@@ -9,12 +9,8 @@ import main.MainPanel;
 import project.v1.Project;
 import projectselect.ProjectSelectController;
 import projectselect.ProjectSelectPanel;
-
 import user.v1.RoleResolver;
-
 import session.UserSession;
-import user.dto.getUserInfo.v1.GetUserInfoInput;
-import user.dto.getUserInfo.v1.GetUserInfoOutput;
 import user.v1.User;
 
 /* 화면 전환 담당 */
@@ -23,6 +19,7 @@ public class AppController {
 
     private final AppFrame frame;
     private final UserSession session;
+    private final RoleResolver roleResolver;
     private final Auth authService;
     private final Project projectService;
     private final User userService;
@@ -33,6 +30,7 @@ public class AppController {
     public AppController(
             AppFrame frame,
             UserSession session,
+            RoleResolver roleResolver,
             Auth authService,
             Project projectService,
             User userService,
@@ -40,6 +38,7 @@ public class AppController {
     ) {
         this.frame = frame;
         this.session = session;
+        this.roleResolver = roleResolver;
         this.authService = authService;
         this.projectService = projectService;
         this.userService = userService;
@@ -72,13 +71,11 @@ public class AppController {
 
     // 로그인 성공 메서드
     private void onLoginSuccess(Integer userId) {
-        GetUserInfoOutput userInfo = userService.getUserInfo(new GetUserInfoInput(userId, null));
-
         // 로그인한 계정의 정보를 session에 저장
         session.login(
-                userInfo != null && userInfo.success() ? userInfo.userId() : userId,
-                userInfo != null && userInfo.success() ? userInfo.loginId() : null,
-                userInfo != null && userInfo.success() ? userInfo.role() : null
+                userId,
+                roleResolver.resolveLoginId(userId),
+                roleResolver.resolveRole(userId)
         );
         // 프로젝트 선택 화면으로 이동
         showProjectSelectScreen();

@@ -49,13 +49,13 @@ public class MockProject implements Project {
                 ))
                 .toList();
 
-        return new GetProjectListOutput(true, "프로젝트 조회 성공", result);
+        return new GetProjectListOutput(true, "프로젝트 목록 조회 성공", result);
     }
 
     @Override
     public UpdateProjectInfoOutput updateProjectInfo(UpdateProjectInfoInput input) {
         if (!isAdmin(input.requesterUserId())) {
-            return new UpdateProjectInfoOutput(false, "Admin만 프로젝트를 수정할 수 있습니다.");
+            return new UpdateProjectInfoOutput(false, "ADMIN만 프로젝트를 수정할 수 있습니다.");
         }
 
         MockProjectData project = database.projects().get(input.projectId());
@@ -70,13 +70,13 @@ public class MockProject implements Project {
 
         project.updateTitle(input.title());
 
-        return new UpdateProjectInfoOutput(true, "프로젝트 수정 성공");
+        return new UpdateProjectInfoOutput(true, "프로젝트 정보 수정 성공");
     }
 
     @Override
     public DeleteProjectOutput deleteProject(DeleteProjectInput input) {
         if (!isAdmin(input.requesterUserId())) {
-            return new DeleteProjectOutput(false, "Admin만 프로젝트를 삭제할 수 있습니다.");
+            return new DeleteProjectOutput(false, "ADMIN만 프로젝트를 삭제할 수 있습니다.");
         }
 
         if (!database.projects().containsKey(input.projectId())) {
