@@ -10,7 +10,7 @@ import issue.dto.recommendAssignee.v1.RecommendAssigneeInput;
 import issue.dto.registerIssue.v1.RegisterIssueInput;
 import issue.v1.Issue;
 import enums.user.v1.UserRole;
-import main.support.ProjectContextGuard;
+import main.support.getCurrentProj;
 import session.UserSession;
 import user.dto.getProjectUserList.v1.GetProjectUserListInput;
 import user.v1.User;
@@ -24,7 +24,7 @@ public class IssueController {
     private final Issue issueService; // 백엔드 아슈 api 인터페이스
     private final User userService; // 백엔드 유저 api 인터페이스
     private final UserSession session; // 로그인 정보 관리
-    private final ProjectContextGuard projectContextGuard;
+    private final getCurrentProj getCurrentProj;
 
     public IssueController(
             IssueView view,
@@ -36,7 +36,7 @@ public class IssueController {
         this.issueService = issueService;
         this.userService = userService;
         this.session = session;
-        this.projectContextGuard = new ProjectContextGuard(session);
+        this.getCurrentProj = new getCurrentProj(session);
 
         bind(); // 버튼 클릭 이벤트와 연결
     }
@@ -335,7 +335,7 @@ public class IssueController {
 
     // 프로젝트ID 가져오는 메서드
     private Integer requireProjectId() {
-        return projectContextGuard.requireProjectId(view::showMessage);
+        return getCurrentProj.requireProjectId(view::showMessage);
     }
 
     // 이슈ID 가져오는 메서드

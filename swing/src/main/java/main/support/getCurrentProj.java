@@ -2,7 +2,8 @@ package main.support;
 
 import session.UserSession;
 
-public class ProjectContextGuard {
+// 현재 선택된 프로젝트가 있는지를 검증
+public class getCurrentProj {
 
     @FunctionalInterface
     public interface MessageSink {
@@ -11,7 +12,7 @@ public class ProjectContextGuard {
 
     private final UserSession session;
 
-    public ProjectContextGuard(UserSession session) {
+    public getCurrentProj(UserSession session) {
         this.session = session;
     }
 
