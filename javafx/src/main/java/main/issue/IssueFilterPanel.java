@@ -59,13 +59,29 @@ class IssueFilterPanel extends HBox {
     }
 
     void setAssignees(List<String> assignees) {
+        // 여기 수정: ComboBox 항목을 다시 채울 때 기존 선택값이 사라지면 필터 값이 null이 되어 모든 이슈가 숨겨진다.
+        // 그래서 기존 선택값을 보존하고, 보존할 수 없으면 전체담당자로 되돌린다.
+        String selected = assigneeBox.getValue();
         assigneeBox.getItems().setAll(ALL_ASSIGNEE);
         assigneeBox.getItems().addAll(assignees);
+        if (selected != null && assigneeBox.getItems().contains(selected)) {
+            assigneeBox.setValue(selected);
+        } else {
+            assigneeBox.setValue(ALL_ASSIGNEE);
+        }
     }
 
     void setReporters(List<String> reporters) {
+        // 여기 수정: reporter 필터도 항목 갱신 후 선택값이 null로 바뀌지 않게 한다.
+        // 선택값이 null이면 matches()에서 모든 행이 false가 되어 이슈 목록이 비어 보인다.
+        String selected = reporterBox.getValue();
         reporterBox.getItems().setAll(ALL_REPORTER);
         reporterBox.getItems().addAll(reporters);
+        if (selected != null && reporterBox.getItems().contains(selected)) {
+            reporterBox.setValue(selected);
+        } else {
+            reporterBox.setValue(ALL_REPORTER);
+        }
     }
 
     void onSearch(Runnable handler) {

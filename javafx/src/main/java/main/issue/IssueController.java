@@ -70,7 +70,12 @@ public class IssueController {
          * reporter는 화면 입력값이 아니라 현재 로그인 사용자(session.loginId)로 자동 지정한다.
          */
         view.showRegisterIssueDialog(backend.projectsForUser(session.loginId(), session.role())).ifPresent(form -> {
-            backend.registerIssue(form.project().id(), form.title(), form.description(), session.loginId(), form.priority());
+            // 여기 수정: backend 등록 실패 메시지를 무시하지 않고 사용자에게 보여준다.
+            String errorMessage = backend.registerIssue(form.project().id(), form.title(), form.description(), session.loginId(), form.priority());
+            if (errorMessage != null) {
+                view.showWarning(errorMessage);
+                return;
+            }
             refreshTable();
         });
     }
@@ -180,9 +185,26 @@ public class IssueController {
 
     private void recommendAssignee() {
         IssueItem selected = requireSelectedIssue();
-        if (selected != null) {
-            view.showRecommendations(backend.recommendAssignees(selected));
+        if (selected == null) {
+            return;
         }
+
+        // 여기 수정: 담당자 추천은 PL이 실제로 배정할 수 있는 NEW/REOPENED 이슈에서만 실행한다.
+        if (!"NEW".equals(selected.status()) && !"REOPENED".equals(selected.status())) {
+            view.showWarning("담당자 추천은 NEW 또는 REOPENED 상태의 이슈에서 사용할 수 있습니다.");
+            return;
+        }
+
+        // 여기 수정: backend의 추천 기능을 호출하고, View에는 추천 후보 목록 표시만 맡긴다.
+        // 여기 수정: 추천 후보를 보여주기만 하지 않고, 후보 선택 후 배정 다이얼로그로 이어지게 한다.
+        List<String> recommendations = backend.recommendAssignees(selected);
+        view.showRecommendationSelectDialog(recommendations).ifPresent(candidate -> {
+            List<String> developers = backend.developerLoginIdsForProject(selected.projectId());
+            view.showAssignIssueDialog(developers, session.loginId(), candidate).ifPresent(form -> {
+                backend.assignIssue(selected.id(), form.assignee(), session.loginId(), form.comment());
+                refreshTable();
+            });
+        });
     }
 
     private void showStatistics() {

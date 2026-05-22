@@ -32,11 +32,15 @@ public interface IssueView {
 
     Optional<AssignIssueForm> showAssignIssueDialog(List<String> developers, String writer);
 
+    Optional<AssignIssueForm> showAssignIssueDialog(List<String> developers, String writer, String defaultDeveloper);
+
     Optional<String> showCommentDialog(String title, String defaultComment);
 
     void showIssueDetail(IssueItem issue);
 
     void showRecommendations(List<String> candidates);
+
+    Optional<String> showRecommendationSelectDialog(List<String> candidates);
 
     void showStatistics(String message);
 

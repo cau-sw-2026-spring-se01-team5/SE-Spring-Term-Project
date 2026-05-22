@@ -191,14 +191,15 @@ public class MockJavaFxBackend implements JavaFxBackend {
     }
 
     @Override
-    public void registerIssue(int projectId, String title, String description, String reporter, String priority) {
-        issue.registerIssue(new issue.dto.registerIssue.v1.RegisterIssueInput(
+    public String registerIssue(int projectId, String title, String description, String reporter, String priority) {
+        var output = issue.registerIssue(new issue.dto.registerIssue.v1.RegisterIssueInput(
                 projectId,
                 title,
                 description,
                 IssuePriority.valueOf(priority),
                 userIdOf(reporter)
         ));
+        return output.success() ? null : output.message();
     }
 
     @Override

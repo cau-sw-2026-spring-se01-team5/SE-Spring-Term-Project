@@ -147,9 +147,14 @@ public class IssuePanel extends VBox implements IssueView {
 
     @Override
     public Optional<AssignIssueForm> showAssignIssueDialog(List<String> developers, String writer) {
+        return showAssignIssueDialog(developers, writer, null);
+    }
+
+    @Override
+    public Optional<AssignIssueForm> showAssignIssueDialog(List<String> developers, String writer, String defaultDeveloper) {
         /*
-         * 배정 다이얼로그도 화면 입력만 담당한다.
-         * 어떤 상태의 이슈에 배정할 수 있는지 같은 업무 규칙은 IssueController에서 검사한다.
+         * 여기 수정: 추천 후보를 클릭한 뒤 배정으로 이어질 수 있도록 기본 개발자 값을 받을 수 있게 했다.
+         * View는 개발자 선택과 코멘트 입력만 담당하고, 실제 배정 처리는 IssueController가 backend에 요청한다.
          */
         if (developers.isEmpty()) {
             UiDialog.showWarning("선택한 프로젝트에 개발자 계정이 없습니다.");
@@ -160,9 +165,16 @@ public class IssuePanel extends VBox implements IssueView {
         GridPane form = formGrid();
         ComboBox<String> developerBox = new ComboBox<>();
         developerBox.getItems().addAll(developers);
-        developerBox.setValue(developers.get(0));
-        TextArea commentArea = new TextArea(writer + "가 이슈를 배정함");
+        if (defaultDeveloper != null && developers.contains(defaultDeveloper)) {
+            developerBox.setValue(defaultDeveloper);
+        } else {
+            developerBox.setValue(developers.get(0));
+        }
+
+        TextArea commentArea = new TextArea(writer + "가 이슈를 " + developerBox.getValue() + "에게 배정합니다.");
         commentArea.setPrefRowCount(3);
+        developerBox.setOnAction(event -> commentArea.setText(writer + "가 이슈를 " + developerBox.getValue() + "에게 배정합니다."));
+
         addRow(form, 0, "개발자", developerBox);
         addRow(form, 1, "코멘트", commentArea);
         dialog.getDialogPane().setContent(form);
@@ -174,7 +186,6 @@ public class IssuePanel extends VBox implements IssueView {
         });
         return dialog.showAndWait();
     }
-
     @Override
     public Optional<String> showCommentDialog(String title, String defaultComment) {
         /*
@@ -214,12 +225,54 @@ public class IssuePanel extends VBox implements IssueView {
                         "수정자: " + issue.fixer() + "\n\n" +
                         "코멘트 이력\n" + comments);
     }
-
     @Override
     public void showRecommendations(List<String> candidates) {
-        UiDialog.showInfo("담당자 자동 추천", "추천 후보: " + String.join(", ", candidates));
+        if (candidates == null || candidates.isEmpty()) {
+            UiDialog.showInfo(
+                    "담당자 자동 추천",
+                    "추천 후보가 없습니다.\n\n" +
+                            "과거에 해결된 이슈의 fixer 기록이 있어야 추천 결과가 나옵니다."
+            );
+            return;
+        }
+
+        StringBuilder message = new StringBuilder();
+        for (int i = 0; i < candidates.size(); i++) {
+            message.append(i + 1)
+                    .append("순위: ")
+                    .append(candidates.get(i))
+                    .append("\n");
+        }
+        UiDialog.showInfo("담당자 자동 추천", message.toString());
     }
 
+    @Override
+    public Optional<String> showRecommendationSelectDialog(List<String> candidates) {
+        // 여기 수정: 추천 이유 표시는 제거하고, 후보 선택만 하도록 되돌렸다.
+        if (candidates == null || candidates.isEmpty()) {
+            UiDialog.showInfo(
+                    "담당자 자동 추천",
+                    "추천 후보가 없습니다.\n\n" +
+                            "과거에 해결된 이슈의 fixer 기록이 있어야 추천 결과가 나옵니다."
+            );
+            return Optional.empty();
+        }
+
+        Dialog<String> dialog = baseDialog("추천 담당자 선택");
+        GridPane form = formGrid();
+        ComboBox<String> candidateBox = new ComboBox<>();
+        candidateBox.getItems().addAll(candidates);
+        candidateBox.setValue(candidates.get(0));
+        addRow(form, 0, "추천 후보", candidateBox);
+        dialog.getDialogPane().setContent(form);
+        dialog.setResultConverter(button -> {
+            if (!button.getButtonData().isDefaultButton()) {
+                return null;
+            }
+            return candidateBox.getValue();
+        });
+        return dialog.showAndWait();
+    }
     @Override
     public void showStatistics(String message) {
         UiDialog.showInfo("이슈 통계 분석", message);
@@ -336,7 +389,7 @@ public class IssuePanel extends VBox implements IssueView {
         return switch (role) {
             case PL -> "NEW";
             case DEV -> "ASSIGNED";
-            case TESTER -> "FIXED";
+            case TESTER -> "전체상태";
             case ADMIN -> "전체상태";
         };
     }

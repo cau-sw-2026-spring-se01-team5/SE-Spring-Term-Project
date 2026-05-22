@@ -127,6 +127,18 @@ public class SqliteUserRepository implements UserRepository {
     }
 
     @Override
+    public void addProjectMembership(Integer userId, Integer projectId) throws Exception {
+        // 여기 수정: 새 프로젝트 생성 후 기존 admin 계정을 해당 프로젝트 사용자 목록에 보이게 한다.
+        try (PreparedStatement statement = connection.prepareStatement(
+                "INSERT OR IGNORE INTO project_memberships(user_id, project_id) VALUES (?, ?)"
+        )) {
+            statement.setInt(1, userId);
+            statement.setInt(2, projectId);
+            statement.executeUpdate();
+        }
+    }
+
+    @Override
     public void delete(Integer id) throws Exception {
         PreparedStatement statement = connection.prepareStatement(
                 "DELETE FROM users WHERE id = ?"

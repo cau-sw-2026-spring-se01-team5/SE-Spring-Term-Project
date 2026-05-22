@@ -103,7 +103,7 @@ public interface JavaFxBackend {
 
     List<IssueItem> issuesForRole(String loginId, UserRole role);
 
-    void registerIssue(int projectId, String title, String description, String reporter, String priority);
+    String registerIssue(int projectId, String title, String description, String reporter, String priority);
 
     void assignIssue(int issueId, String assignee, String writer, String comment);
 

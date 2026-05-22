@@ -33,6 +33,9 @@ import repository.sqlite.SqliteCommentRepository;
 import repository.sqlite.SqliteIssueRepository;
 import repository.sqlite.SqliteProjectRepository;
 import repository.sqlite.SqliteUserRepository;
+import statistics.dto.countByStatus.v1.CountByStatusInput;
+import statistics.dto.getDailyIssueCounts.v1.GetDailyIssueCountsInput;
+import statistics.v1.Statistics;
 import user.dto.createUser.v1.CreateUserInput;
 import user.dto.deleteUser.v1.DeleteUserInput;
 import user.dto.getProjectUserList.v1.GetProjectUserListInput;
@@ -74,6 +77,7 @@ public class RealJavaFxBackend implements JavaFxBackend {
     private final Project project;
     private final User user;
     private final Issue issue;
+    private final Statistics statistics;
     private final UserRepository userRepository;
 
     private RealJavaFxBackend(
@@ -81,12 +85,14 @@ public class RealJavaFxBackend implements JavaFxBackend {
             Project project,
             User user,
             Issue issue,
+            Statistics statistics,
             UserRepository userRepository
     ) {
         this.auth = auth;
         this.project = project;
         this.user = user;
         this.issue = issue;
+        this.statistics = statistics;
         this.userRepository = userRepository;
     }
 
@@ -117,8 +123,9 @@ public class RealJavaFxBackend implements JavaFxBackend {
             Project project = new ProjectImpl(userRepository, projectRepository);
             User user = new UserImpl(userRepository);
             Issue issue = new IssueImpl(userRepository, issueRepository, commentRepository, recommendationRepository);
+            Statistics statistics = new controller.statistics.v1.StatisticsImpl(issueRepository);
 
-            return new RealJavaFxBackend(auth, project, user, issue, userRepository);
+            return new RealJavaFxBackend(auth, project, user, issue, statistics, userRepository);
         } catch (Exception e) {
             throw new IllegalStateException("실제 backend 초기화 실패: " + e.getMessage(), e);
         }
@@ -140,19 +147,7 @@ public class RealJavaFxBackend implements JavaFxBackend {
 
     @Override
     public int countByStatus(String status) {
-        IssueStatus target = IssueStatus.valueOf(status);
-        return (int) projects().stream()
-                .flatMap(projectItem -> issue.getIssueList(new GetIssueListInput(
-                        projectItem.id(),
-                        adminUserId(),
-                        null,
-                        null,
-                        null,
-                        target,
-                        null,
-                        null
-                )).issues().stream())
-                .count();
+        return (int) statistics.countByStatus(new CountByStatusInput(null, IssueStatus.valueOf(status))).count();
     }
 
     @Override
@@ -271,14 +266,15 @@ public class RealJavaFxBackend implements JavaFxBackend {
     }
 
     @Override
-    public void registerIssue(int projectId, String title, String description, String reporter, String priority) {
-        issue.registerIssue(new RegisterIssueInput(
+    public String registerIssue(int projectId, String title, String description, String reporter, String priority) {
+        var output = issue.registerIssue(new RegisterIssueInput(
                 projectId,
                 title,
                 description,
                 IssuePriority.valueOf(priority),
                 userIdOf(reporter)
         ));
+        return output.success() ? null : output.message();
     }
 
     @Override
@@ -329,21 +325,12 @@ public class RealJavaFxBackend implements JavaFxBackend {
 
     @Override
     public Map<String, Long> dailyIssueCounts() {
-        return projects().stream()
-                .flatMap(projectItem -> issue.getIssueList(new GetIssueListInput(
-                        projectItem.id(),
-                        adminUserId(),
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null
-                )).issues().stream())
-                .collect(Collectors.groupingBy(
-                        summary -> formatDate(summary.reportedDate()).split(" ")[0],
-                        LinkedHashMap::new,
-                        Collectors.counting()
+        return statistics.getDailyIssueCounts(new GetDailyIssueCountsInput(null)).counts().stream()
+                .collect(Collectors.toMap(
+                        count -> count.date(),
+                        count -> count.count(),
+                        (left, right) -> left,
+                        LinkedHashMap::new
                 ));
     }
 
