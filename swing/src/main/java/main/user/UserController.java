@@ -1,7 +1,7 @@
 package main.user;
 
 import enums.user.v1.UserRole;
-import main.support.ProjectContextGuard;
+import main.support.getCurrentProj;
 import session.UserSession;
 import user.dto.createUser.v1.CreateUserInput;
 import user.dto.deleteUser.v1.DeleteUserInput;
@@ -15,7 +15,7 @@ public class UserController {
     private final UserView view; // 유저 화면 UI 인터페이스
     private final User userService; // 백엔드 api
     private final UserSession session; // 현재 접속한 유저 확인
-    private final ProjectContextGuard projectContextGuard; // 현재 프로젝트 파악
+    private final getCurrentProj getCurrentProj; // 현재 프로젝트 파악
 
     public UserController(
             UserView view,
@@ -25,7 +25,7 @@ public class UserController {
         this.view = view;
         this.userService = userService;
         this.session = session;
-        this.projectContextGuard = new ProjectContextGuard(session);
+        this.getCurrentProj = new getCurrentProj(session);
 
         bind();
     }
@@ -120,6 +120,6 @@ public class UserController {
 
     // 지금 프로젝트 id 가져오기
     private Integer getProjectId() {
-        return projectContextGuard.requireProjectId(view::showMessage);
+        return getCurrentProj.requireProjectId(view::showMessage);
     }
 }

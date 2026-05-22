@@ -11,6 +11,7 @@ import projectselect.ProjectSelectController;
 import projectselect.ProjectSelectPanel;
 import user.v1.RoleResolver;
 import session.UserSession;
+import statistics.v1.Statistics;
 import user.v1.User;
 
 /* 화면 전환 담당 */
@@ -24,6 +25,7 @@ public class AppController {
     private final Project projectService;
     private final User userService;
     private final Issue issueService;
+    private final Statistics statisticsService;
 
     // 외부(Main)에서 필요한 객체들을 주입 받음
     // 객체 생성 책임을 분리
@@ -34,7 +36,8 @@ public class AppController {
             Auth authService,
             Project projectService,
             User userService,
-            Issue issueService
+            Issue issueService,
+            Statistics statisticsService
     ) {
         this.frame = frame;
         this.session = session;
@@ -43,6 +46,7 @@ public class AppController {
         this.projectService = projectService;
         this.userService = userService;
         this.issueService = issueService;
+        this.statisticsService = statisticsService;
     }
 
     // 첫 로그인 화면 진입
@@ -109,6 +113,7 @@ public class AppController {
                 projectService,
                 userService,
                 issueService,
+                statisticsService,
                 authService,
                 session,
                 this::showProjectSelectScreen,

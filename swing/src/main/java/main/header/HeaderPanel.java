@@ -1,11 +1,15 @@
 package main.header;
 
 import enums.user.v1.UserRole;
+import main.statistics.StatisticsPanel;
+import statistics.dto.getDailyIssueCounts.v1.DailyIssueCountOutput;
 import ui.UiTheme;
 import ui.event.UiEvent;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.util.List;
+import java.util.Map;
 
 // 헤더 영역의 실제 UI 구현체
 public class HeaderPanel extends JPanel implements HeaderView {
@@ -13,8 +17,10 @@ public class HeaderPanel extends JPanel implements HeaderView {
 
     private final JLabel userInfoLabel = new JLabel(); // 현재 로그인한 사용자 정보 표시 라벨
     private final JButton backToProjectListButton = new JButton("프로젝트 목록으로");
+    private final JButton statisticsButton = new JButton("통계");
     private final JButton logoutButton = new JButton("로그아웃");
     private final UiEvent backToProjectListEvent = new UiEvent(); // actionListener 대신에 UiEvent로 추상화 -> 패널은 순수 UI만 그리도록
+    private final UiEvent openStatisticsEvent = new UiEvent();
     private final UiEvent logoutEvent = new UiEvent(); // actionListener 대신에 UiEvent로 추상화 -> 패널은 순수 UI만 그리도록
 
     public HeaderPanel() {
@@ -29,14 +35,17 @@ public class HeaderPanel extends JPanel implements HeaderView {
         JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT)); // 오른쪽 영역 패널 -> FlowLayout으로 오른쪽 정렬
         right.setOpaque(false);
         right.add(backToProjectListButton);
+        right.add(statisticsButton);
         right.add(logoutButton);
 
         userInfoLabel.setForeground(Color.BLACK); // 글자색 변경
         UiTheme.styleSecondaryButton(backToProjectListButton); // 공통 UI 테마 디자인 적용
+        UiTheme.styleSecondaryButton(statisticsButton);
         UiTheme.styleSecondaryButton(logoutButton);
 
         // 버튼에 이벤트 연결
         backToProjectListButton.addActionListener(e -> backToProjectListEvent.emit());
+        statisticsButton.addActionListener(e -> openStatisticsEvent.emit());
         logoutButton.addActionListener(e -> logoutEvent.emit());
 
         add(left, BorderLayout.WEST);
@@ -61,9 +70,19 @@ public class HeaderPanel extends JPanel implements HeaderView {
         backToProjectListEvent.subscribe(handler);
     }
 
+    @Override
+    public void onOpenStatistics(Runnable handler) {
+        openStatisticsEvent.subscribe(handler);
+    }
+
     // 메세지 팝업 출력
     @Override
     public void showMessage(String message) {
         JOptionPane.showMessageDialog(this, message);
+    }
+
+    @Override
+    public void showStatistics(Map<String, Long> statusCounts, List<DailyIssueCountOutput> dailyCounts) {
+        StatisticsPanel.show(this, statusCounts, dailyCounts);
     }
 }
