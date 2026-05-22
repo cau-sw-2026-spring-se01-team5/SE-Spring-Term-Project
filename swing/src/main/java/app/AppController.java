@@ -9,6 +9,9 @@ import main.MainPanel;
 import project.v1.Project;
 import projectselect.ProjectSelectController;
 import projectselect.ProjectSelectPanel;
+
+import user.v1.RoleResolver;
+
 import session.UserSession;
 import user.dto.getUserInfo.v1.GetUserInfoInput;
 import user.dto.getUserInfo.v1.GetUserInfoOutput;

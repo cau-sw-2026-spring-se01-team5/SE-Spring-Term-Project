@@ -36,7 +36,7 @@ import project.dto.getProjectList.v1.ProjectInfoOutput;
 import project.dto.updateProjectInfo.v1.UpdateProjectInfoInput;
 import project.dto.updateProjectInfo.v1.UpdateProjectInfoOutput;
 import project.v1.Project;
-import session.RoleResolver;
+import user.v1.RoleResolver;
 import user.dto.createUser.v1.CreateUserInput;
 import user.dto.createUser.v1.CreateUserOutput;
 import user.dto.deleteUser.v1.DeleteUserInput;

@@ -1,4 +1,4 @@
-package session;
+package user.v1;
 
 import enums.user.v1.UserRole;
 
