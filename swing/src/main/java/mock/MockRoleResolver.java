@@ -2,7 +2,7 @@ package mock;
 
 import enums.user.v1.UserRole;
 import mock.model.MockUserData;
-import session.RoleResolver;
+import user.v1.RoleResolver;
 
 public class MockRoleResolver implements RoleResolver {
 

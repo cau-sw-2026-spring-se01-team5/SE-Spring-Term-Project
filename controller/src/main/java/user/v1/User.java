@@ -6,6 +6,8 @@ import user.dto.deleteUser.v1.DeleteUserInput;
 import user.dto.deleteUser.v1.DeleteUserOutput;
 import user.dto.getProjectUserList.v1.GetProjectUserListInput;
 import user.dto.getProjectUserList.v1.GetProjectUserListOutput;
+import user.dto.getUserInfo.v1.GetUserInfoInput;
+import user.dto.getUserInfo.v1.GetUserInfoOutput;
 
 public interface User {
 
@@ -14,4 +16,6 @@ public interface User {
     GetProjectUserListOutput getProjectUserList(GetProjectUserListInput input);
 
     DeleteUserOutput deleteUser(DeleteUserInput input);
+
+    GetUserInfoOutput getUserInfo(GetUserInfoInput input);
 }

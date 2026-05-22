@@ -1,0 +1,18 @@
+package domain;
+
+import enums.user.v1.UserRole;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+
+@Getter @Setter @RequiredArgsConstructor
+public class User {
+    private Integer id;
+    @NonNull
+    private String loginId;
+    @NonNull
+    private String password;
+    @NonNull
+    private UserRole role;
+}

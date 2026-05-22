@@ -9,7 +9,7 @@ import main.MainPanel;
 import project.v1.Project;
 import projectselect.ProjectSelectController;
 import projectselect.ProjectSelectPanel;
-import session.RoleResolver;
+import user.v1.RoleResolver;
 import session.UserSession;
 import user.v1.User;
 

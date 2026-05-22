@@ -9,6 +9,8 @@ import user.dto.deleteUser.v1.DeleteUserOutput;
 import user.dto.getProjectUserList.v1.GetProjectUserListInput;
 import user.dto.getProjectUserList.v1.GetProjectUserListOutput;
 import user.dto.getProjectUserList.v1.UserInfoOutput;
+import user.dto.getUserInfo.v1.GetUserInfoInput;
+import user.dto.getUserInfo.v1.GetUserInfoOutput;
 import user.v1.User;
 
 import java.util.List;
@@ -25,7 +27,7 @@ public class MockUser implements User {
     @Override
     public CreateUserOutput createUser(CreateUserInput input) {
         if (!isAdmin(input.requesterUserId())) {
-            return new CreateUserOutput(false, null, "Admin만 유저를 생성할 수 있습니다.");
+            return new CreateUserOutput(false, null, "ADMIN만 계정을 생성할 수 있습니다.");
         }
 
         if (input.loginId() == null || input.loginId().isBlank()) {
@@ -53,7 +55,7 @@ public class MockUser implements User {
                 )
         );
 
-        return new CreateUserOutput(true, userId, "유저 생성 성공");
+        return new CreateUserOutput(true, userId, "계정 생성 성공");
     }
 
     @Override
@@ -76,7 +78,7 @@ public class MockUser implements User {
     @Override
     public DeleteUserOutput deleteUser(DeleteUserInput input) {
         if (!isAdmin(input.requesterUserId())) {
-            return new DeleteUserOutput(false, "Admin만 유저를 삭제할 수 있습니다.");
+            return new DeleteUserOutput(false, "ADMIN만 계정을 삭제할 수 있습니다.");
         }
 
         if (!database.users().containsKey(input.targetUserId())) {
@@ -85,7 +87,31 @@ public class MockUser implements User {
 
         database.users().remove(input.targetUserId());
 
-        return new DeleteUserOutput(true, "유저 삭제 성공");
+        return new DeleteUserOutput(true, "계정 삭제 성공");
+    }
+
+    @Override
+    public GetUserInfoOutput getUserInfo(GetUserInfoInput input) {
+        MockUserData user = database.users().get(input.userId());
+        if (user == null) {
+            return new GetUserInfoOutput(
+                    false,
+                    null,
+                    null,
+                    null,
+                    input.projectId(),
+                    "유저를 찾을 수 없습니다."
+            );
+        }
+
+        return new GetUserInfoOutput(
+                true,
+                user.userId(),
+                user.loginId(),
+                user.role(),
+                user.projectId(),
+                "유저 정보 조회 성공"
+        );
     }
 
     private boolean isAdmin(Integer userId) {

@@ -36,7 +36,7 @@ import project.dto.getProjectList.v1.ProjectInfoOutput;
 import project.dto.updateProjectInfo.v1.UpdateProjectInfoInput;
 import project.dto.updateProjectInfo.v1.UpdateProjectInfoOutput;
 import project.v1.Project;
-import session.RoleResolver;
+import user.v1.RoleResolver;
 import user.dto.createUser.v1.CreateUserInput;
 import user.dto.createUser.v1.CreateUserOutput;
 import user.dto.deleteUser.v1.DeleteUserInput;
@@ -44,6 +44,8 @@ import user.dto.deleteUser.v1.DeleteUserOutput;
 import user.dto.getProjectUserList.v1.GetProjectUserListInput;
 import user.dto.getProjectUserList.v1.GetProjectUserListOutput;
 import user.dto.getProjectUserList.v1.UserInfoOutput;
+import user.dto.getUserInfo.v1.GetUserInfoInput;
+import user.dto.getUserInfo.v1.GetUserInfoOutput;
 import user.v1.User;
 
 import java.time.LocalDateTime;
@@ -90,11 +92,11 @@ public class MockBackend implements Auth, Project, User, Issue, RoleResolver {
     @Override
     public LoginOutput login(LoginInput input) {
         if (input.loginId() == null || input.loginId().isBlank()) {
-            return new LoginOutput(false, null, "아이디를 입력하세요.");
+            return new LoginOutput(false, null, "아이디를 입력해야 합니다.");
         }
 
         if (input.password() == null || input.password().isBlank()) {
-            return new LoginOutput(false, null, "비밀번호를 입력하세요.");
+            return new LoginOutput(false, null, "비밀번호를 입력해야 합니다.");
         }
 
         for (MockUser user : users.values()) {
@@ -142,13 +144,13 @@ public class MockBackend implements Auth, Project, User, Issue, RoleResolver {
                 .map(p -> new ProjectInfoOutput(p.projectId, p.title))
                 .toList();
 
-        return new GetProjectListOutput(true, "프로젝트 조회 성공", result);
+        return new GetProjectListOutput(true, "프로젝트 목록 조회 성공", result);
     }
 
     @Override
     public UpdateProjectInfoOutput updateProjectInfo(UpdateProjectInfoInput input) {
         if (!isAdmin(input.requesterUserId())) {
-            return new UpdateProjectInfoOutput(false, "Admin만 프로젝트를 수정할 수 있습니다.");
+            return new UpdateProjectInfoOutput(false, "ADMIN만 프로젝트를 수정할 수 있습니다.");
         }
 
         MockProject project = projects.get(input.projectId());
@@ -159,13 +161,13 @@ public class MockBackend implements Auth, Project, User, Issue, RoleResolver {
 
         project.title = input.title();
 
-        return new UpdateProjectInfoOutput(true, "프로젝트 수정 성공");
+        return new UpdateProjectInfoOutput(true, "프로젝트 정보 수정 성공");
     }
 
     @Override
     public DeleteProjectOutput deleteProject(DeleteProjectInput input) {
         if (!isAdmin(input.requesterUserId())) {
-            return new DeleteProjectOutput(false, "Admin만 프로젝트를 삭제할 수 있습니다.");
+            return new DeleteProjectOutput(false, "ADMIN만 프로젝트를 삭제할 수 있습니다.");
         }
 
         projects.remove(input.projectId());
@@ -176,7 +178,7 @@ public class MockBackend implements Auth, Project, User, Issue, RoleResolver {
     @Override
     public CreateUserOutput createUser(CreateUserInput input) {
         if (!isAdmin(input.requesterUserId())) {
-            return new CreateUserOutput(false, null, "Admin만 유저를 생성할 수 있습니다.");
+            return new CreateUserOutput(false, null, "ADMIN만 계정을 생성할 수 있습니다.");
         }
 
         if (input.loginId() == null || input.loginId().isBlank()) {
@@ -195,7 +197,7 @@ public class MockBackend implements Auth, Project, User, Issue, RoleResolver {
                 )
         );
 
-        return new CreateUserOutput(true, id, "유저 생성 성공");
+        return new CreateUserOutput(true, id, "계정 생성 성공");
     }
 
     @Override
@@ -212,12 +214,39 @@ public class MockBackend implements Auth, Project, User, Issue, RoleResolver {
     @Override
     public DeleteUserOutput deleteUser(DeleteUserInput input) {
         if (!isAdmin(input.requesterUserId())) {
-            return new DeleteUserOutput(false, "Admin만 유저를 삭제할 수 있습니다.");
+            return new DeleteUserOutput(false, "ADMIN만 계정을 삭제할 수 있습니다.");
+        }
+
+        if (!users.containsKey(input.targetUserId())) {
+            return new DeleteUserOutput(false, "삭제할 유저가 존재하지 않습니다.");
         }
 
         users.remove(input.targetUserId());
 
-        return new DeleteUserOutput(true, "유저 삭제 성공");
+        return new DeleteUserOutput(true, "계정 삭제 성공");
+    }
+
+    @Override
+    public GetUserInfoOutput getUserInfo(GetUserInfoInput input) {
+        MockUser user = users.get(input.userId());
+        if (user == null) {
+            return new GetUserInfoOutput(
+                    false,
+                    null,
+                    null,
+                    null,
+                    input.projectId(),
+                    "유저를 찾을 수 없습니다."
+            );
+        }
+        return new GetUserInfoOutput(
+                true,
+                user.userId,
+                user.loginId,
+                user.role,
+                user.projectId,
+                "유저 정보 조회 성공"
+        );
     }
 
     @Override
@@ -225,7 +254,7 @@ public class MockBackend implements Auth, Project, User, Issue, RoleResolver {
         MockUser reporter = users.get(input.reporterUserId());
 
         if (reporter == null || reporter.role != UserRole.TESTER) {
-            return new RegisterIssueOutput(false, null, "Tester만 이슈를 등록할 수 있습니다.");
+            return new RegisterIssueOutput(false, null, "TESTER만 이슈를 등록할 수 있습니다.");
         }
 
         if (input.issueTitle() == null || input.issueTitle().isBlank()) {
@@ -258,8 +287,9 @@ public class MockBackend implements Auth, Project, User, Issue, RoleResolver {
 
     @Override
     public AssignIssueOutput assignIssue(AssignIssueInput input) {
-        if (!hasRole(input.requesterUserId(), UserRole.PL)) {
-            return new AssignIssueOutput(false, input.issueId(), "PL만 이슈를 배정할 수 있습니다.");
+        if (!hasRole(input.requesterUserId(), UserRole.PL)
+                && !isAdmin(input.requesterUserId())) {
+            return new AssignIssueOutput(false, input.issueId(), "PL 또는 Admin만 이슈를 배정할 수 있습니다.");
         }
 
         MockUser assignee = users.get(input.assigneeUserId());
@@ -274,10 +304,16 @@ public class MockBackend implements Auth, Project, User, Issue, RoleResolver {
             return new AssignIssueOutput(false, input.issueId(), "이슈가 존재하지 않습니다.");
         }
 
+        if (issue.status != IssueStatus.NEW && issue.status != IssueStatus.REOPENED) {
+            return new AssignIssueOutput(false, input.issueId(), "NEW 또는 REOPENED 상태 이슈만 배정할 수 있습니다.");
+        }
+
+        if (!Objects.equals(issue.projectId, assignee.projectId)) {
+            return new AssignIssueOutput(false, input.issueId(), "동일 프로젝트의 DEV에게만 배정할 수 있습니다.");
+        }
+
         issue.assigneeUserId = input.assigneeUserId();
         issue.status = IssueStatus.ASSIGNED;
-
-        addCommentInternal(issue, input.requesterUserId(), input.comment());
 
         return new AssignIssueOutput(true, input.issueId(), "이슈 배정 성공");
     }
@@ -291,24 +327,61 @@ public class MockBackend implements Auth, Project, User, Issue, RoleResolver {
         }
 
         IssueStatus targetStatus = input.targetStatus();
+        if (targetStatus == null) {
+            return new ChangeIssueStatusOutput(false, input.issueId(), issue.status, "변경할 상태를 선택하세요.");
+        }
+
+        if (targetStatus == IssueStatus.ASSIGNED) {
+            return new ChangeIssueStatusOutput(false, input.issueId(), issue.status, "ASSIGNED 전환은 배정 기능을 사용하세요.");
+        }
+
+        boolean admin = isAdmin(input.requesterUserId());
 
         if (targetStatus == IssueStatus.FIXED) {
-            if (!hasRole(input.requesterUserId(), UserRole.DEV)) {
+            if (!admin && !hasRole(input.requesterUserId(), UserRole.DEV)) {
                 return new ChangeIssueStatusOutput(false, input.issueId(), issue.status, "DEV만 fixed 처리할 수 있습니다.");
             }
 
-            issue.fixerUserId = input.requesterUserId();
+            if (issue.status != IssueStatus.ASSIGNED) {
+                return new ChangeIssueStatusOutput(false, input.issueId(), issue.status, "ASSIGNED 상태에서만 FIXED로 변경할 수 있습니다.");
+            }
+
+            if (hasRole(input.requesterUserId(), UserRole.DEV)) {
+                issue.fixerUserId = input.requesterUserId();
+            }
         }
 
         if (targetStatus == IssueStatus.RESOLVED) {
-            if (!hasRole(input.requesterUserId(), UserRole.TESTER)) {
+            if (!admin && !hasRole(input.requesterUserId(), UserRole.TESTER)) {
                 return new ChangeIssueStatusOutput(false, input.issueId(), issue.status, "TESTER만 resolved 처리할 수 있습니다.");
+            }
+
+            if (!admin && !Objects.equals(issue.reporterUserId, input.requesterUserId())) {
+                return new ChangeIssueStatusOutput(false, input.issueId(), issue.status, "해당 이슈를 등록한 TESTER만 resolved 처리할 수 있습니다.");
+            }
+
+            if (issue.status != IssueStatus.FIXED) {
+                return new ChangeIssueStatusOutput(false, input.issueId(), issue.status, "FIXED 상태에서만 RESOLVED로 변경할 수 있습니다.");
             }
         }
 
         if (targetStatus == IssueStatus.CLOSED) {
-            if (!hasRole(input.requesterUserId(), UserRole.PL)) {
+            if (!admin && !hasRole(input.requesterUserId(), UserRole.PL)) {
                 return new ChangeIssueStatusOutput(false, input.issueId(), issue.status, "PL만 closed 처리할 수 있습니다.");
+            }
+
+            if (issue.status != IssueStatus.RESOLVED) {
+                return new ChangeIssueStatusOutput(false, input.issueId(), issue.status, "RESOLVED 상태에서만 CLOSED로 변경할 수 있습니다.");
+            }
+        }
+
+        if (targetStatus == IssueStatus.REOPENED) {
+            if (!admin) {
+                return new ChangeIssueStatusOutput(false, input.issueId(), issue.status, "REOPENED는 Admin만 처리할 수 있습니다.");
+            }
+
+            if (issue.status != IssueStatus.RESOLVED) {
+                return new ChangeIssueStatusOutput(false, input.issueId(), issue.status, "RESOLVED 상태에서만 REOPENED로 변경할 수 있습니다.");
             }
         }
 
@@ -417,6 +490,10 @@ public class MockBackend implements Auth, Project, User, Issue, RoleResolver {
     public DeleteIssueOutput deleteIssue(DeleteIssueInput input) {
         if (!isAdmin(input.requesterUserId()) && !hasRole(input.requesterUserId(), UserRole.PL)) {
             return new DeleteIssueOutput(false, "Admin 또는 PL만 이슈를 삭제할 수 있습니다.");
+        }
+
+        if (!issues.containsKey(input.issueId())) {
+            return new DeleteIssueOutput(false, "삭제할 이슈가 존재하지 않습니다.");
         }
 
         issues.remove(input.issueId());
