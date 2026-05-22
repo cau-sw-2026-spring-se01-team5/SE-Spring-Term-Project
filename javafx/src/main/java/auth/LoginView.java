@@ -1,6 +1,6 @@
 package auth;
 
-import app.JavaFxBackend;
+import backend.JavaFxBackend;
 
 import java.util.function.Consumer;
 

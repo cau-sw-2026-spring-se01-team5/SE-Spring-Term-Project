@@ -1,6 +1,6 @@
 package main.dashboard;
 
-import app.JavaFxBackend;
+import backend.JavaFxBackend;
 import enums.user.v1.UserRole;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;

@@ -1,4 +1,4 @@
-package app;
+package backend;
 
 import enums.user.v1.UserRole;
 

@@ -1,9 +1,8 @@
 package main.project;
 
-import app.JavaFxBackend;
-import app.JavaFxBackend.ProjectItem;
-import app.JavaFxBackend.UserItem;
-import app.UiDialog;
+import backend.JavaFxBackend.ProjectItem;
+import backend.JavaFxBackend.UserItem;
+import ui.UiDialog;
 import enums.user.v1.UserRole;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -12,41 +11,53 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import session.UserSession;
+
+import java.util.List;
+import java.util.Optional;
 
 /*
- * 프로젝트/계정 관리 본문 패널이다.
+ * 프로젝트/계정 관리 화면을 그리는 JavaFX Panel이다.
  *
- * Swing의 기능별 Panel처럼 메인 화면의 center 영역에 들어가는 실제 UI이다.
- * 프로젝트 목록과 선택 프로젝트 계정 목록을 나란히 두어 소속 관계를 명확히 보여준다.
+ * 이 클래스는 화면 배치, 입력 다이얼로그, 사용자 이벤트 전달만 담당한다.
+ * 프로젝트 생성/삭제, 계정 생성/삭제 같은 실제 처리 흐름은 ProjectController가 담당한다.
  */
-public class ProjectPanel extends VBox {
+public class ProjectPanel extends VBox implements ProjectView {
 
-    private final JavaFxBackend backend;
-    private final UserSession session;
-    private final ListView<ProjectItem> projectList = new ListView<>();
-    private final ListView<UserItem> userList = new ListView<>();
+    private final UserRole role;
+    private final ProjectListPanel projectListPanel = new ProjectListPanel();
+    private final ProjectUserListPanel userListPanel = new ProjectUserListPanel();
 
-    public ProjectPanel(JavaFxBackend backend, UserSession session) {
-        this.backend = backend;
-        this.session = session;
+    private Button createProjectButton;
+    private Button createUserButton;
+    private Button projectDetailButton;
+    private Button deleteProjectButton;
+    private Button deleteUserButton;
+    private Button userDetailButton;
+    private Button showMembersButton;
+    private Button showMyRoleButton;
+
+    public ProjectPanel(UserRole role) {
+        this.role = role;
         build();
     }
 
     private void build() {
+        /*
+         * 프로젝트/계정 화면의 전체 배치를 만든다.
+         * 이 클래스는 목록, 버튼, 다이얼로그 같은 화면 요소만 만들고,
+         * 실제 생성/삭제 처리는 ProjectController가 담당한다.
+         */
         setSpacing(16);
         setPadding(new Insets(34));
 
         VBox titleBox = new VBox(6);
-        Label titleLabel = new Label(session.role() == UserRole.ADMIN ? "프로젝트/계정 관리" : "프로젝트 정보");
+        Label titleLabel = new Label(role == UserRole.ADMIN ? "프로젝트/계정 관리" : "프로젝트 정보");
         titleLabel.setStyle("-fx-font-size: 30px; -fx-font-weight: bold;");
         Label descLabel = new Label(description());
         descLabel.setWrapText(true);
@@ -55,67 +66,90 @@ public class ProjectPanel extends VBox {
 
         HBox createBox = new HBox(10);
         createBox.setAlignment(Pos.CENTER_LEFT);
-        if (session.role() == UserRole.ADMIN) {
-            Button createProjectButton = primaryButton("프로젝트 추가");
-            Button createUserButton = primaryButton("선택 프로젝트에 계정 추가");
-            createProjectButton.setOnAction(e -> createProjectDialog());
-            createUserButton.setOnAction(e -> createUserDialog());
+        if (role == UserRole.ADMIN) {
+            createProjectButton = primaryButton("프로젝트 추가");
+            createUserButton = primaryButton("선택 프로젝트에 계정 추가");
             createBox.getChildren().addAll(createProjectButton, createUserButton);
         }
 
-        projectList.setPrefHeight(360);
-        projectList.setStyle("-fx-font-size: 14px;");
-        projectList.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> refreshProjectUsers());
-
-        userList.setPrefHeight(360);
-        userList.setStyle("-fx-font-size: 14px;");
-
         HBox lists = new HBox(18);
-        lists.getChildren().addAll(listCard("프로젝트 목록", projectList), listCard("선택 프로젝트 계정", userList));
+        lists.getChildren().addAll(projectListPanel, userListPanel);
 
         HBox actionBox = new HBox(10);
         actionBox.getChildren().addAll(roleActions());
 
         getChildren().add(titleBox);
-        if (session.role() == UserRole.ADMIN) {
+        if (role == UserRole.ADMIN) {
             getChildren().add(createBox);
         }
         getChildren().addAll(lists, actionBox);
-        refreshLists();
     }
 
     private Button[] roleActions() {
-        return switch (session.role()) {
-            case ADMIN -> new Button[]{
-                    actionButton("프로젝트 상세", this::showProjectDetail),
-                    actionButton("프로젝트 삭제", this::deleteProject),
-                    actionButton("계정 삭제", this::deleteUser),
-                    actionButton("계정 상세", this::showUserDetail)
-            };
-            case PL -> new Button[]{actionButton("프로젝트 상세", this::showProjectDetail), actionButton("구성원 확인", this::showMembers)};
-            case DEV, TESTER -> new Button[]{actionButton("프로젝트 상세", this::showProjectDetail), actionButton("내 역할 확인", this::showMyRole)};
+        /*
+         * 역할별로 프로젝트 화면에서 가능한 동작 버튼을 다르게 보여준다.
+         * admin은 생성/삭제/상세 확인을 수행하고,
+         * PL/DEV/TESTER는 자신의 프로젝트 정보 확인 위주로 제한된다.
+         */
+        return switch (role) {
+            case ADMIN -> {
+                projectDetailButton = secondaryButton("프로젝트 상세");
+                deleteProjectButton = secondaryButton("프로젝트 삭제");
+                deleteUserButton = secondaryButton("계정 삭제");
+                userDetailButton = secondaryButton("계정 상세");
+                yield new Button[]{projectDetailButton, deleteProjectButton, deleteUserButton, userDetailButton};
+            }
+            case PL -> {
+                projectDetailButton = secondaryButton("프로젝트 상세");
+                showMembersButton = secondaryButton("구성원 확인");
+                yield new Button[]{projectDetailButton, showMembersButton};
+            }
+            case DEV, TESTER -> {
+                projectDetailButton = secondaryButton("프로젝트 상세");
+                showMyRoleButton = secondaryButton("내 역할 확인");
+                yield new Button[]{projectDetailButton, showMyRoleButton};
+            }
         };
     }
 
-    private void refreshLists() {
-        projectList.getItems().setAll(session.role() == UserRole.ADMIN ? backend.projects() : backend.projectsForUser(session.loginId(), session.role()));
-        if (!projectList.getItems().isEmpty() && projectList.getSelectionModel().getSelectedItem() == null) {
-            projectList.getSelectionModel().selectFirst();
-        }
-        refreshProjectUsers();
+    @Override
+    public void setProjects(List<ProjectItem> projects) {
+        projectListPanel.setProjects(projects);
     }
 
-    private void refreshProjectUsers() {
-        ProjectItem selected = projectList.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            userList.getItems().clear();
-            return;
-        }
-        userList.getItems().setAll(backend.usersForProject(selected.id()));
+    @Override
+    public void setUsers(List<UserItem> users) {
+        userListPanel.setUsers(users);
     }
 
-    private void createProjectDialog() {
-        Dialog<Void> dialog = baseDialog("프로젝트 추가");
+    @Override
+    public void clearUsers() {
+        userListPanel.clearUsers();
+    }
+
+    @Override
+    public ProjectItem selectedProject() {
+        return projectListPanel.selectedProject();
+    }
+
+    @Override
+    public UserItem selectedUser() {
+        return userListPanel.selectedUser();
+    }
+
+    @Override
+    public void selectProject(ProjectItem project) {
+        projectListPanel.select(project);
+    }
+
+    @Override
+    public Optional<CreateProjectForm> showCreateProjectDialog() {
+        /*
+         * 프로젝트 생성 다이얼로그는 프로젝트명과 설명 입력만 담당한다.
+         * 입력 결과는 CreateProjectForm으로 Controller에 전달하고,
+         * backend.addProject 호출은 ProjectController가 수행한다.
+         */
+        Dialog<CreateProjectForm> dialog = baseDialog("프로젝트 추가");
         GridPane form = formGrid();
         TextField nameField = new TextField();
         TextArea descriptionArea = new TextArea();
@@ -124,121 +158,140 @@ public class ProjectPanel extends VBox {
         addRow(form, 1, "설명", descriptionArea);
         dialog.getDialogPane().setContent(form);
         dialog.setResultConverter(button -> {
-            if (button.getButtonData().isDefaultButton()) {
-                if (nameField.getText().isBlank()) {
-                    UiDialog.showWarning("프로젝트명을 입력하세요.");
-                    return null;
-                }
-                ProjectItem project = backend.addProject(nameField.getText(), descriptionArea.getText());
-                refreshLists();
-                projectList.getSelectionModel().select(project);
+            if (!button.getButtonData().isDefaultButton()) {
+                return null;
             }
-            return null;
+            if (nameField.getText().isBlank()) {
+                UiDialog.showWarning("프로젝트명을 입력하세요.");
+                return null;
+            }
+            return new CreateProjectForm(nameField.getText(), descriptionArea.getText());
         });
-        dialog.showAndWait();
+        return dialog.showAndWait();
     }
 
-    private void createUserDialog() {
-        ProjectItem selectedProject = projectList.getSelectionModel().getSelectedItem();
-        if (selectedProject == null) {
-            UiDialog.showWarning("먼저 계정을 추가할 프로젝트를 선택하세요.");
-            return;
-        }
-        Dialog<Void> dialog = baseDialog("계정 추가");
+    @Override
+    public Optional<CreateUserForm> showCreateUserDialog(ProjectItem project) {
+        /*
+         * 계정 생성 다이얼로그는 선택된 프로젝트에 추가할 계정 정보를 입력받는다.
+         * 중복 ID 검사나 실제 생성 요청은 Controller가 처리하므로,
+         * View는 입력값을 CreateUserForm으로 묶어 반환하는 데 집중한다.
+         */
+        Dialog<CreateUserForm> dialog = baseDialog("계정 추가");
         GridPane form = formGrid();
         TextField loginField = new TextField();
         PasswordField passwordField = new PasswordField();
         ComboBox<UserRole> roleBox = new ComboBox<>();
         roleBox.getItems().addAll(UserRole.PL, UserRole.DEV, UserRole.TESTER);
         roleBox.setValue(UserRole.DEV);
-        addRow(form, 0, "프로젝트", new Label(selectedProject.name()));
+        addRow(form, 0, "프로젝트", new Label(project.name()));
         addRow(form, 1, "계정 ID", loginField);
         addRow(form, 2, "비밀번호", passwordField);
         addRow(form, 3, "역할", roleBox);
         dialog.getDialogPane().setContent(form);
         dialog.setResultConverter(button -> {
-            if (button.getButtonData().isDefaultButton()) {
-                if (loginField.getText().isBlank() || passwordField.getText().isBlank()) {
-                    UiDialog.showWarning("계정 ID와 비밀번호를 입력하세요.");
-                    return null;
-                }
-                if (backend.hasLoginId(loginField.getText())) {
-                    UiDialog.showWarning("이미 존재하는 계정 ID입니다.");
-                    return null;
-                }
-                backend.addUser(loginField.getText(), passwordField.getText(), roleBox.getValue(), selectedProject.id());
-                refreshProjectUsers();
+            if (!button.getButtonData().isDefaultButton()) {
+                return null;
             }
-            return null;
+            if (loginField.getText().isBlank() || passwordField.getText().isBlank()) {
+                UiDialog.showWarning("계정 ID와 비밀번호를 입력하세요.");
+                return null;
+            }
+            return new CreateUserForm(loginField.getText(), passwordField.getText(), roleBox.getValue());
         });
-        dialog.showAndWait();
+        return dialog.showAndWait();
     }
 
-    private void showProjectDetail() {
-        ProjectItem selected = projectList.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            UiDialog.showWarning("먼저 프로젝트를 선택하세요.");
-            return;
+    @Override
+    public void showProjectDetail(ProjectItem project) {
+        UiDialog.showInfo("프로젝트 상세", "번호: " + project.id() + "\n프로젝트명: " + project.name() + "\n설명: " + project.description());
+    }
+
+    @Override
+    public void showUserDetail(UserItem user) {
+        UiDialog.showInfo("계정 상세", "번호: " + user.id() + "\n계정 ID: " + user.loginId() + "\n비밀번호: " + user.password() + "\n역할: " + roleText(user.role()));
+    }
+
+    @Override
+    public void showMembers(ProjectItem project) {
+        UiDialog.showInfo("프로젝트 구성원", project.name() + "의 구성원은 오른쪽 목록에서 확인할 수 있습니다.");
+    }
+
+    @Override
+    public void showMyRole(String loginId, UserRole role) {
+        UiDialog.showInfo("내 역할", loginId + " 계정의 역할은 " + roleText(role) + "입니다.");
+    }
+
+    @Override
+    public void showWarning(String message) {
+        UiDialog.showWarning(message);
+    }
+
+    @Override
+    public void onProjectSelected(Runnable handler) {
+        projectListPanel.onSelectionChanged(handler);
+    }
+
+    @Override
+    public void onCreateProject(Runnable handler) {
+        /*
+         * 버튼 이벤트 등록 메서드이다.
+         * ProjectPanel은 handler를 실행할 뿐이고, handler 내부의 실제 기능 흐름은 Controller가 가진다.
+         */
+        if (createProjectButton != null) {
+            createProjectButton.setOnAction(event -> handler.run());
         }
-        UiDialog.showInfo("프로젝트 상세", "번호: " + selected.id() + "\n프로젝트명: " + selected.name() + "\n설명: " + selected.description());
     }
 
-    private void deleteProject() {
-        ProjectItem selected = projectList.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            UiDialog.showWarning("먼저 프로젝트를 선택하세요.");
-            return;
+    @Override
+    public void onCreateUser(Runnable handler) {
+        if (createUserButton != null) {
+            createUserButton.setOnAction(event -> handler.run());
         }
-        backend.deleteProject(selected.id());
-        refreshLists();
     }
 
-    private void deleteUser() {
-        UserItem selected = userList.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            UiDialog.showWarning("먼저 계정을 선택하세요.");
-            return;
+    @Override
+    public void onProjectDetail(Runnable handler) {
+        projectDetailButton.setOnAction(event -> handler.run());
+    }
+
+    @Override
+    public void onDeleteProject(Runnable handler) {
+        if (deleteProjectButton != null) {
+            deleteProjectButton.setOnAction(event -> handler.run());
         }
-        backend.deleteUser(selected.loginId());
-        refreshProjectUsers();
     }
 
-    private void showUserDetail() {
-        UserItem selected = userList.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            UiDialog.showWarning("먼저 계정을 선택하세요.");
-            return;
+    @Override
+    public void onDeleteUser(Runnable handler) {
+        if (deleteUserButton != null) {
+            deleteUserButton.setOnAction(event -> handler.run());
         }
-        UiDialog.showInfo("계정 상세", "번호: " + selected.id() + "\n계정 ID: " + selected.loginId() + "\n비밀번호: " + selected.password() + "\n역할: " + roleText(selected.role()));
     }
 
-    private void showMembers() {
-        ProjectItem selected = projectList.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            UiDialog.showWarning("먼저 프로젝트를 선택하세요.");
-            return;
+    @Override
+    public void onUserDetail(Runnable handler) {
+        if (userDetailButton != null) {
+            userDetailButton.setOnAction(event -> handler.run());
         }
-        UiDialog.showInfo("프로젝트 구성원", selected.name() + "의 구성원은 오른쪽 목록에서 확인할 수 있습니다.");
     }
 
-    private void showMyRole() {
-        UiDialog.showInfo("내 역할", session.loginId() + " 계정의 역할은 " + roleText(session.role()) + "입니다.");
+    @Override
+    public void onShowMembers(Runnable handler) {
+        if (showMembersButton != null) {
+            showMembersButton.setOnAction(event -> handler.run());
+        }
     }
 
-    private VBox listCard(String titleText, ListView<?> listView) {
-        VBox card = new VBox(12);
-        card.setPadding(new Insets(18));
-        card.setPrefWidth(330);
-        card.setStyle(cardStyle());
-        Label title = new Label(titleText);
-        title.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
-        card.getChildren().addAll(title, listView);
-        HBox.setHgrow(card, Priority.ALWAYS);
-        return card;
+    @Override
+    public void onShowMyRole(Runnable handler) {
+        if (showMyRoleButton != null) {
+            showMyRoleButton.setOnAction(event -> handler.run());
+        }
     }
 
     private String description() {
-        return switch (session.role()) {
+        return switch (role) {
             case ADMIN -> "관리자는 프로젝트를 만들고, 선택한 프로젝트에 PL/개발자/테스터 계정을 생성합니다.";
             case PL -> "PL은 자신이 속한 프로젝트와 구성원을 확인합니다.";
             case DEV -> "개발자는 자신이 속한 프로젝트 정보를 확인합니다.";
@@ -246,14 +299,12 @@ public class ProjectPanel extends VBox {
         };
     }
 
-    private Button actionButton(String text, Runnable action) {
-        Button button = secondaryButton(text);
-        button.setOnAction(e -> action.run());
-        return button;
-    }
-
-    private Dialog<Void> baseDialog(String title) {
-        Dialog<Void> dialog = new Dialog<>();
+    private <T> Dialog<T> baseDialog(String title) {
+        /*
+         * 프로젝트 화면에서 사용하는 다이얼로그 기본 설정을 한 곳에 모았다.
+         * 같은 스타일의 확인/취소 버튼을 반복해서 만들지 않기 위한 공통화이다.
+         */
+        Dialog<T> dialog = new Dialog<>();
         dialog.setTitle(title);
         dialog.getDialogPane().getButtonTypes().addAll(UiDialog.okButtonType(), UiDialog.cancelButtonType());
         UiDialog.styleDialog(dialog);
@@ -287,14 +338,6 @@ public class ProjectPanel extends VBox {
         button.setPrefHeight(38);
         button.setStyle("-fx-background-color: white; -fx-text-fill: #111827; -fx-font-size: 14px; -fx-border-color: #d1d5db; -fx-border-radius: 8; -fx-background-radius: 8; -fx-cursor: hand;");
         return button;
-    }
-
-    private String cardStyle() {
-        return "-fx-background-color: white;" +
-                "-fx-background-radius: 10;" +
-                "-fx-border-radius: 10;" +
-                "-fx-border-color: #e5e7eb;" +
-                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.09), 10, 0, 0, 3);";
     }
 
     private String roleText(UserRole role) {

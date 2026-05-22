@@ -1,6 +1,6 @@
 package auth;
 
-import app.JavaFxBackend;
+import backend.JavaFxBackend;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
