@@ -24,7 +24,8 @@ public interface IssueView {
     record CreateIssueForm(
             String title,
             String description,
-            IssuePriority priority
+            IssuePriority priority,
+            String comment
     ) {}
 
     record AssigneeCandidate(
@@ -61,6 +62,8 @@ public interface IssueView {
     void showIssueDetail(GetIssueDetailOutput output);
 
     void showRecommendations(RecommendAssigneeOutput output);
+
+    void closeIssueDetail();
 
     void onSearchIssues(Runnable handler);
 

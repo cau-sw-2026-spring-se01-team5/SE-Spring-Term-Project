@@ -142,8 +142,13 @@ public class IssueController {
             return;
         }
 
+        if (form.comment() == null || form.comment().isBlank()) {
+            view.showMessage("comment는 필수 입력값입니다.");
+            return;
+        }
+
         // 입력값을 DTO로 만들어서 이슈 등록 api 호출
-        var output = issueService.registerIssue(
+        var registerOutput = issueService.registerIssue(
                 new RegisterIssueInput(
                         projectId,
                         form.title(),
@@ -154,10 +159,22 @@ public class IssueController {
         );
 
         // 백엔드 api 호출 결과 받아옴
-        view.showMessage(output.message());
+        view.showMessage(registerOutput.message());
 
-        // 등록 성공 시 전체 이슈 목록 리랜더링
-        if (output.success()) {
+        // 등록 성공 시 생성된 issueId에 comment도 즉시 등록
+        if (registerOutput.success() && registerOutput.issueId() != null) {
+            var commentOutput = issueService.addIssueComment(
+                    new AddIssueCommentInput(
+                            registerOutput.issueId(),
+                            session.userId(),
+                            form.comment()
+                    )
+            );
+
+            if (!commentOutput.success()) {
+                view.showMessage("이슈 등록 성공 but 코멘트 등록 실패: " + commentOutput.message());
+            }
+
             loadAllIssues();
         }
     }
@@ -312,8 +329,8 @@ public class IssueController {
         view.showMessage(output.message());
 
         if (output.success()) {
+            view.closeIssueDetail();
             loadAllIssues();
-            showIssueDetail(issueId);
         }
     }
 
