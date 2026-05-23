@@ -69,16 +69,10 @@ public class IssuePanel extends JPanel implements IssueView {
         return issueDetailPanel.getTargetIssueStatusInput();
     }
 
-    // 검색 조건 입력 팝업 표시
+    // 검색 조건 입력값 반환
     @Override
-    public SearchCondition showSearchDialog() {
-        return issueListPanel.showSearchPopup();
-    }
-
-    // 검색 결과 팝업 표시 후 선택된 이슈 ID 반환
-    @Override
-    public Integer showSearchResultAndSelectIssue(List<IssueSummaryOutput> issues) {
-        return issueListPanel.getSelectedIssueId(issues);
+    public SearchCondition getSearchCondition() {
+        return issueListPanel.getSearchCondition();
     }
 
     // 이슈 생성 입력 팝업 표시
