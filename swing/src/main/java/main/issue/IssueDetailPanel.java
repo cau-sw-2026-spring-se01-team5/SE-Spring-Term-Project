@@ -115,6 +115,13 @@ public class IssueDetailPanel extends JPanel {
         JOptionPane.showMessageDialog(parent, message);
     }
 
+    public void closeIssueDetail() {
+        activeDetailIssueId = null;
+        if (detailPopup != null) {
+            detailPopup.setVisible(false);
+        }
+    }
+
     // 상세 팝업 생성 + 배치
     private void makeDetailPopup() {
         if (detailPopup != null) {

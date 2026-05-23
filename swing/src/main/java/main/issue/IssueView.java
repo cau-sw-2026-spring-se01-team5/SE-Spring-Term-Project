@@ -63,6 +63,8 @@ public interface IssueView {
 
     void showRecommendations(RecommendAssigneeOutput output);
 
+    void closeIssueDetail();
+
     void onSearchIssues(Runnable handler);
 
     void onRegisterIssue(Runnable handler);

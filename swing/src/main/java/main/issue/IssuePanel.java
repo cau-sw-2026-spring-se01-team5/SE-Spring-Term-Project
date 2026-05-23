@@ -93,6 +93,11 @@ public class IssuePanel extends JPanel implements IssueView {
         issueDetailPanel.showRecommendations(output);
     }
 
+    @Override
+    public void closeIssueDetail() {
+        issueDetailPanel.closeIssueDetail();
+    }
+
     // 버튼에 이벤트 등록
     @Override
     public void onSearchIssues(Runnable handler) {

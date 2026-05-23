@@ -329,8 +329,8 @@ public class IssueController {
         view.showMessage(output.message());
 
         if (output.success()) {
+            view.closeIssueDetail();
             loadAllIssues();
-            showIssueDetail(issueId);
         }
     }
 
