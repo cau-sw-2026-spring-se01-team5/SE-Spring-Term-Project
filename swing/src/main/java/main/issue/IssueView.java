@@ -54,9 +54,7 @@ public interface IssueView {
 
     IssueStatus getTargetIssueStatusInput();
 
-    SearchCondition showSearchDialog();
-
-    Integer showSearchResultAndSelectIssue(List<IssueSummaryOutput> issues);
+    SearchCondition getSearchCondition();
 
     CreateIssueForm showCreateIssueDialog();
 

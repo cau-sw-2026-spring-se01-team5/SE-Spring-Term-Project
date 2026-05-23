@@ -68,18 +68,7 @@ public class IssueController {
             return;
         }
 
-        IssueView.SearchCondition condition; // 검색 조건을 담을 객체
-        try {
-            condition = view.showSearchDialog(); // 검색 조건 입력 팝업 띄우고 결과를 condition객체에 담음
-        } catch (IllegalArgumentException e) {
-            view.showMessage(e.getMessage()); // 입력값 잘못되면 그 에러 받아서 팝업으로 띄움
-            return;
-        }
-
-        // 사용자가 검색창 취소하면 아무것도 안함
-        if (condition == null) {
-            return;
-        }
+        IssueView.SearchCondition condition = view.getSearchCondition(); // 목록 화면 상단 필터 입력값
 
         // 사용자가 입력한 검색 조건을 DTO로 만들어서 Issue 서비스에 전달함
         var output = issueService.getIssueList(
@@ -101,12 +90,7 @@ public class IssueController {
             return;
         }
 
-        Integer selectedIssueId = view.showSearchResultAndSelectIssue(output.issues()); // 검색 결과를 띄우고 사용자 선택 이슈 ID 가져옴
-
-        // 사용자가 이슈 선택했으면 해당 이슈 상세 정보 보여줌
-        if (selectedIssueId != null) {
-            showIssueDetail(selectedIssueId);
-        }
+        view.setIssues(output.issues()); // 메인 브라우즈 목록 자체를 필터 결과로 갱신
     }
 
     // 현재 프로젝트의 전체 이슈 목록 불러옴
