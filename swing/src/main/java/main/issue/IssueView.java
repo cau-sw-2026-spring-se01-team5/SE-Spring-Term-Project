@@ -24,7 +24,8 @@ public interface IssueView {
     record CreateIssueForm(
             String title,
             String description,
-            IssuePriority priority
+            IssuePriority priority,
+            String comment
     ) {}
 
     record AssigneeCandidate(
