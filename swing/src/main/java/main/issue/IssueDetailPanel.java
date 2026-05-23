@@ -10,6 +10,7 @@ import ui.UiTheme;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.util.List;
 
 // 이슈 상세 보기 관련 UI
 public class IssueDetailPanel extends JPanel {
@@ -73,12 +74,7 @@ public class IssueDetailPanel extends JPanel {
             return;
         }
 
-        JOptionPane.showMessageDialog(
-                this,
-                output.candidates().toString(),
-                "Recommended Assignees",
-                JOptionPane.INFORMATION_MESSAGE
-        );
+        showRecommendationPopup(output.candidates());
     }
 
     // 현재 사용자 권한 저장 -> UI에 적용
@@ -171,5 +167,46 @@ public class IssueDetailPanel extends JPanel {
             return;
         }
         findRightIssuePolicy.find(currentRole).apply(actionPanel);
+    }
+
+    private void showRecommendationPopup(List<issue.dto.recommendAssignee.v1.RecommendedAssigneeOutput> candidates) {
+        JPanel root = new JPanel(new BorderLayout(10, 10));
+        root.setBackground(UiTheme.BG);
+        root.setBorder(new EmptyBorder(12, 12, 12, 12));
+
+        JLabel title = new JLabel("추천 담당자 목록");
+        title.setForeground(Color.BLACK);
+        title.setFont(new Font("Dialog", Font.BOLD, 18));
+        root.add(title, BorderLayout.NORTH);
+
+        String[] columns = {"순위", "추천자 ID"};
+        Object[][] data;
+        if (candidates == null || candidates.isEmpty()) {
+            data = new Object[][]{{"-", "추천 결과 없음"}};
+        } else {
+            data = new Object[candidates.size()][2];
+            for (int i = 0; i < candidates.size(); i++) {
+                var candidate = candidates.get(i);
+                data[i][0] = candidate.rank() + "위";
+                data[i][1] = candidate.userId();
+            }
+        }
+
+        JTable table = new JTable(data, columns);
+        table.setEnabled(false);
+        table.setRowHeight(30);
+        UiTheme.styleTable(table);
+
+        JScrollPane scroll = new JScrollPane(table);
+        scroll.setBorder(UiTheme.cardBorder(6));
+        scroll.setPreferredSize(new Dimension(420, 180));
+        root.add(scroll, BorderLayout.CENTER);
+
+        JOptionPane.showMessageDialog(
+                this,
+                root,
+                "추천 결과",
+                JOptionPane.PLAIN_MESSAGE
+        );
     }
 }
