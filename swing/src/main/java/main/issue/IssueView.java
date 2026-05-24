@@ -41,6 +41,8 @@ public interface IssueView {
 
     void setIssues(List<IssueSummaryOutput> issues);
 
+    List<IssueSummaryOutput> getVisibleIssues();
+
     Integer getSelectedIssueId();
 
     Integer getActiveDetailIssueId();

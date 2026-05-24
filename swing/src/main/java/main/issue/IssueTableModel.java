@@ -27,6 +27,10 @@ public class IssueTableModel extends AbstractTableModel {
         return issues.get(rowIndex);
     }
 
+    public List<IssueSummaryOutput> getIssues() {
+        return new ArrayList<>(issues);
+    }
+
     @Override
     public int getRowCount() {
         return issues.size();

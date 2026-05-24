@@ -138,6 +138,10 @@ public class IssueListPanel extends JPanel {
         issueTableModel.setIssues(issues);
     }
 
+    public List<IssueSummaryOutput> getVisibleIssues() {
+        return issueTableModel.getIssues();
+    }
+
     public Integer getSelectedIssueId() {
         int row = issueTable.getSelectedRow();
         if (row < 0) {
