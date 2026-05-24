@@ -77,7 +77,7 @@ public interface JavaFxBackend {
 
     Optional<LoginUser> login(String loginId, String password);
 
-    int countByStatus(String status);
+    int countByStatus(Integer projectId, String status);
 
     List<ProjectItem> projects();
 
@@ -111,7 +111,7 @@ public interface JavaFxBackend {
 
     void resolveIssue(int issueId, String writer, String comment);
 
-    void reopenIssue(int issueId, String writer, String comment);
+    String reopenIssue(int issueId, String writer, String comment);
 
     void closeIssue(int issueId, String writer, String comment);
 
@@ -119,5 +119,5 @@ public interface JavaFxBackend {
 
     List<String> recommendAssignees(IssueItem issue);
 
-    Map<String, Long> dailyIssueCounts();
+    Map<String, Long> dailyIssueCounts(Integer projectId);
 }

@@ -17,15 +17,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/*
- * 대시보드 본문 패널이다.
- *
- * 여기 수정: 과제 요구사항의 "이슈 통계 분석"을 JavaFX에서 바로 보여주기 위해
- * 상태별 이슈 수, 일별 발생 추이, 월별 발생 추이 예시 영역을 추가했다.
- *
- * 실제 backend의 이슈 데이터만 사용한다.
- * 이슈가 하나도 없으면 0건 또는 "데이터 없음"으로 표시한다.
- */
 public class DashboardPanel extends VBox {
 
     private final JavaFxBackend backend;
@@ -49,7 +40,8 @@ public class DashboardPanel extends VBox {
         Label title = new Label("대시보드");
         title.setStyle("-fx-font-size: 30px; -fx-font-weight: bold;");
 
-        Label user = new Label("현재 로그인: " + session.loginId() + " / " + roleText(session.role()));
+        String projectTitle = session.selectedProjectTitle() == null ? "프로젝트 미선택" : session.selectedProjectTitle();
+        Label user = new Label("현재 로그인: " + session.loginId() + " / " + roleText(session.role()) + " / 프로젝트: " + projectTitle);
         user.setStyle("-fx-font-size: 14px; -fx-text-fill: #6b7280;");
 
         Map<String, Integer> statusCounts = statusCounts();
@@ -59,8 +51,8 @@ public class DashboardPanel extends VBox {
         HBox summary = new HBox(14);
         summary.getChildren().addAll(
                 metricCard("NEW", String.valueOf(statusCounts.get("NEW")), "PL 배정 대기"),
-                metricCard("ASSIGNED", String.valueOf(statusCounts.get("ASSIGNED")), "개발자 처리 중"),
-                metricCard("FIXED", String.valueOf(statusCounts.get("FIXED")), "테스터 검증 대기"),
+                metricCard("ASSIGNED", String.valueOf(statusCounts.get("ASSIGNED")), "개발 처리 중"),
+                metricCard("FIXED", String.valueOf(statusCounts.get("FIXED")), "테스트 검증 대기"),
                 metricCard("RESOLVED", String.valueOf(statusCounts.get("RESOLVED")), "PL 종료 대기"),
                 metricCard("CLOSED", String.valueOf(statusCounts.get("CLOSED")), "완료 이력")
         );
@@ -84,29 +76,24 @@ public class DashboardPanel extends VBox {
     }
 
     private Map<String, Integer> statusCounts() {
+        Integer projectId = session.selectedProjectId();
         Map<String, Integer> counts = new LinkedHashMap<>();
-        counts.put("NEW", backend.countByStatus("NEW"));
-        counts.put("ASSIGNED", backend.countByStatus("ASSIGNED"));
-        counts.put("FIXED", backend.countByStatus("FIXED"));
-        counts.put("RESOLVED", backend.countByStatus("RESOLVED"));
-        counts.put("CLOSED", backend.countByStatus("CLOSED"));
-
+        counts.put("NEW", backend.countByStatus(projectId, "NEW"));
+        counts.put("ASSIGNED", backend.countByStatus(projectId, "ASSIGNED"));
+        counts.put("FIXED", backend.countByStatus(projectId, "FIXED"));
+        counts.put("RESOLVED", backend.countByStatus(projectId, "RESOLVED"));
+        counts.put("CLOSED", backend.countByStatus(projectId, "CLOSED"));
         return counts;
     }
 
     private Map<String, Long> dailyCounts() {
-        Map<String, Long> daily = backend.dailyIssueCounts();
-        if (daily != null && !daily.isEmpty()) {
-            return daily;
-        }
-
-        return new LinkedHashMap<>();
+        return new LinkedHashMap<>(backend.dailyIssueCounts(session.selectedProjectId()));
     }
 
     private Map<String, Long> monthlyCounts(Map<String, Long> dailyCounts) {
         return dailyCounts.entrySet().stream()
                 .collect(Collectors.groupingBy(
-                        entry -> entry.getKey().length() >= 7 ? entry.getKey().substring(0, 7) : entry.getKey(),
+                        entry -> entry.getKey().substring(0, 7),
                         LinkedHashMap::new,
                         Collectors.summingLong(Map.Entry::getValue)
                 ));
@@ -122,7 +109,7 @@ public class DashboardPanel extends VBox {
         title.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
         panel.getChildren().add(title);
 
-        if (data.isEmpty()) {
+        if (data.isEmpty() || data.values().stream().allMatch(value -> value.longValue() == 0L)) {
             Label empty = new Label("데이터 없음");
             empty.setStyle("-fx-font-size: 13px; -fx-text-fill: #9ca3af;");
             panel.getChildren().add(empty);
@@ -148,7 +135,6 @@ public class DashboardPanel extends VBox {
         label.setStyle("-fx-font-size: 12px; -fx-text-fill: #374151;");
 
         Region bar = new Region();
-        // 여기 수정: 막대가 너무 길면 오른쪽 건수 텍스트가 잘리므로 최대 막대 폭을 줄인다.
         double width = max <= 0 ? 0 : Math.max(16, 86 * (value / max));
         bar.setPrefSize(width, 10);
         bar.setStyle("-fx-background-color: #2563eb; -fx-background-radius: 999;");
@@ -164,23 +150,23 @@ public class DashboardPanel extends VBox {
     private Button[] shortcutButtons() {
         return switch (session.role()) {
             case ADMIN -> new Button[]{
-                    shortcutButton("프로젝트/계정 관리", showProjects),
+                    shortcutButton("프로젝트 선택 변경", showProjects),
                     shortcutButton("이슈 이력 확인", showIssues)
             };
             case PL -> new Button[]{
                     shortcutButton("NEW 이슈 배정", showIssues),
                     shortcutButton("담당자 추천/통계", showIssues),
-                    shortcutButton("프로젝트 구성원 확인", showProjects)
+                    shortcutButton("프로젝트 선택 변경", showProjects)
             };
             case DEV -> new Button[]{
                     shortcutButton("내 배정 이슈", showIssues),
                     shortcutButton("수정 완료 처리", showIssues),
-                    shortcutButton("프로젝트 정보", showProjects)
+                    shortcutButton("프로젝트 선택 변경", showProjects)
             };
             case TESTER -> new Button[]{
                     shortcutButton("이슈 등록", showIssues),
                     shortcutButton("FIXED 이슈 검증", showIssues),
-                    shortcutButton("프로젝트 정보", showProjects)
+                    shortcutButton("프로젝트 선택 변경", showProjects)
             };
         };
     }

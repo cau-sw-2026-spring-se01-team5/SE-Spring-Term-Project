@@ -14,7 +14,7 @@ import java.util.Optional;
  */
 public interface IssueView {
 
-    record CreateIssueForm(ProjectItem project, String title, String description, String priority) {
+    record CreateIssueForm(ProjectItem project, String title, String description, String priority, String comment) {
     }
 
     record AssignIssueForm(String assignee, String comment) {

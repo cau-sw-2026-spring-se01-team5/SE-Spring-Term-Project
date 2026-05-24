@@ -146,8 +146,8 @@ public class RealJavaFxBackend implements JavaFxBackend {
     }
 
     @Override
-    public int countByStatus(String status) {
-        return (int) statistics.countByStatus(new CountByStatusInput(null, IssueStatus.valueOf(status))).count();
+    public int countByStatus(Integer projectId, String status) {
+        return (int) statistics.countByStatus(new CountByStatusInput(projectId, IssueStatus.valueOf(status))).count();
     }
 
     @Override
@@ -254,8 +254,8 @@ public class RealJavaFxBackend implements JavaFxBackend {
                 .flatMap(projectItem -> issue.getIssueList(new GetIssueListInput(
                         projectItem.id(),
                         currentUserId,
-                        role == UserRole.DEV ? currentUserId : null,
-                        role == UserRole.TESTER ? currentUserId : null,
+                        null,
+                        null,
                         null,
                         null,
                         null,
@@ -296,9 +296,13 @@ public class RealJavaFxBackend implements JavaFxBackend {
     }
 
     @Override
-    public void reopenIssue(int issueId, String writer, String comment) {
-        issue.changeIssueStatus(new ChangeIssueStatusInput(issueId, adminUserId(), IssueStatus.REOPENED));
+    public String reopenIssue(int issueId, String writer, String comment) {
+        var output = issue.changeIssueStatus(new ChangeIssueStatusInput(issueId, userIdOf(writer), IssueStatus.REOPENED));
+        if (!output.success()) {
+            return output.message();
+        }
         addComment(issueId, writer, comment);
+        return null;
     }
 
     @Override
@@ -324,8 +328,8 @@ public class RealJavaFxBackend implements JavaFxBackend {
     }
 
     @Override
-    public Map<String, Long> dailyIssueCounts() {
-        return statistics.getDailyIssueCounts(new GetDailyIssueCountsInput(null)).counts().stream()
+    public Map<String, Long> dailyIssueCounts(Integer projectId) {
+        return statistics.getDailyIssueCounts(new GetDailyIssueCountsInput(projectId)).counts().stream()
                 .collect(Collectors.toMap(
                         count -> count.date(),
                         count -> count.count(),

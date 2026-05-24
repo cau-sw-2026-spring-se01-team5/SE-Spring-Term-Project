@@ -2,17 +2,14 @@ package main.issue;
 
 import backend.JavaFxBackend;
 import backend.JavaFxBackend.IssueItem;
+import backend.JavaFxBackend.ProjectItem;
+import backend.JavaFxBackend.UserItem;
+import enums.user.v1.UserRole;
 import session.UserSession;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-/*
- * 이슈 기능의 사용자 이벤트와 backend 호출 흐름을 담당하는 Controller이다.
- *
- * IssuePanel은 화면 입력과 표시만 담당하고, 이슈 등록/배정/상태 변경/추천/통계 처리는
- * 이 Controller가 JavaFxBackend에 요청한다.
- */
 public class IssueController {
 
     private final IssueView view;
@@ -27,19 +24,11 @@ public class IssueController {
     }
 
     public void start() {
-        /*
-         * 화면이 처음 열릴 때 검색 필터의 선택지를 backend에서 가져온다.
-         * 개발자/테스터 계정 목록은 데이터에 따라 달라질 수 있으므로 View에 고정하지 않았다.
-         */
-        view.setFilterOptions(backend.developerLoginIds(), backend.testerLoginIds());
+        view.setFilterOptions(projectDeveloperLoginIds(), projectTesterLoginIds());
         refreshTable();
     }
 
     private void bind() {
-        /*
-         * View에서 발생하는 사용자 이벤트를 Controller 메서드에 연결한다.
-         * View는 버튼 클릭 사실만 알려주고, 실제로 무엇을 할지는 Controller가 결정한다.
-         */
         view.onSearch(this::refreshTable);
         view.onRegisterIssue(this::registerIssue);
         view.onShowIssueDetail(this::showSelectedIssue);
@@ -54,37 +43,47 @@ public class IssueController {
     }
 
     private void refreshTable() {
-        /*
-         * 역할별로 볼 수 있는 이슈 목록은 backend가 1차로 결정한다.
-         * 그 이후 키워드, 상태, 우선순위 같은 화면 검색 조건은 View가 가진 필터 조건으로 거른다.
-         */
-        List<IssueItem> filtered = backend.issuesForRole(session.loginId(), session.role()).stream()
+        List<IssueItem> filtered = currentProjectIssues().stream()
                 .filter(view::matchesFilter)
-                .collect(Collectors.toList());
+                .toList();
         view.setIssues(filtered);
     }
 
     private void registerIssue() {
-        /*
-         * 이슈 등록은 테스터가 입력한 프로젝트, 제목, 설명, 우선순위를 받아 backend에 요청한다.
-         * reporter는 화면 입력값이 아니라 현재 로그인 사용자(session.loginId)로 자동 지정한다.
-         */
-        view.showRegisterIssueDialog(backend.projectsForUser(session.loginId(), session.role())).ifPresent(form -> {
-            // 여기 수정: backend 등록 실패 메시지를 무시하지 않고 사용자에게 보여준다.
-            String errorMessage = backend.registerIssue(form.project().id(), form.title(), form.description(), session.loginId(), form.priority());
+        List<ProjectItem> availableProjects = currentProjectItems();
+        if (availableProjects.isEmpty()) {
+            view.showWarning("선택된 프로젝트가 없습니다.");
+            return;
+        }
+
+        view.showRegisterIssueDialog(availableProjects).ifPresent(form -> {
+            String errorMessage = backend.registerIssue(
+                    form.project().id(),
+                    form.title(),
+                    form.description(),
+                    session.loginId(),
+                    form.priority()
+            );
             if (errorMessage != null) {
                 view.showWarning(errorMessage);
                 return;
+            }
+            IssueItem createdIssue = currentProjectIssues().stream()
+                    .filter(issue -> issue.projectId() == form.project().id())
+                    .filter(issue -> issue.title().equals(form.title()))
+                    .filter(issue -> issue.description().equals(form.description()))
+                    .filter(issue -> issue.reporter().equals(session.loginId()))
+                    .reduce((first, second) -> second)
+                    .orElse(null);
+
+            if (createdIssue != null) {
+                backend.addComment(createdIssue.id(), session.loginId(), form.comment());
             }
             refreshTable();
         });
     }
 
     private void assignIssue() {
-        /*
-         * 배정은 선택된 이슈가 있어야 하고, NEW 또는 REOPENED 상태에서만 가능하다.
-         * 이 규칙을 View가 아니라 Controller에서 확인해서 화면 코드에 업무 규칙이 섞이지 않게 했다.
-         */
         IssueItem selected = requireSelectedIssue();
         if (selected == null) {
             return;
@@ -100,10 +99,6 @@ public class IssueController {
     }
 
     private void markFixed() {
-        /*
-         * 개발자는 자신에게 배정된 이슈만 FIXED로 변경할 수 있다.
-         * 현재 로그인 사용자와 선택 이슈의 assignee를 비교해서 잘못된 상태 변경을 막는다.
-         */
         IssueItem selected = requireSelectedIssue();
         if (selected == null) {
             return;
@@ -112,17 +107,13 @@ public class IssueController {
             view.showWarning("자신에게 배정된 이슈만 수정 완료 처리할 수 있습니다.");
             return;
         }
-        view.showCommentDialog("수정 완료 처리", "수정이 완료되었으며 테스트 검증을 요청합니다.").ifPresent(comment -> {
+        view.showCommentDialog("수정 완료 처리", "수정을 완료했고 테스트 검증을 요청합니다.").ifPresent(comment -> {
             backend.markFixed(selected.id(), session.loginId(), comment);
             refreshTable();
         });
     }
 
     private void resolveIssue() {
-        /*
-         * 테스터는 FIXED 상태의 이슈를 확인한 뒤 RESOLVED로 바꿀 수 있다.
-         * 상태 전이 조건을 Controller에 두어 View는 단순히 버튼과 메시지만 담당한다.
-         */
         IssueItem selected = requireSelectedIssue();
         if (selected == null) {
             return;
@@ -140,19 +131,24 @@ public class IssueController {
         if (selected == null) {
             return;
         }
-        if (!"FIXED".equals(selected.status())) {
-            view.showWarning("FIXED 상태의 이슈만 재오픈할 수 있습니다.");
+        if (session.role() != UserRole.ADMIN) {
+            view.showWarning("관리자만 재오픈할 수 있습니다.");
             return;
         }
-        backend.reopenIssue(selected.id(), session.loginId(), "테스터가 수정 부족으로 재오픈함");
+        if (!"CLOSED".equals(selected.status())) {
+            view.showWarning("CLOSED 상태의 이슈만 재오픈할 수 있습니다.");
+            return;
+        }
+
+        String errorMessage = backend.reopenIssue(selected.id(), session.loginId(), "관리자가 종료된 이슈를 재오픈함");
+        if (errorMessage != null) {
+            view.showWarning(errorMessage);
+            return;
+        }
         refreshTable();
     }
 
     private void closeIssue() {
-        /*
-         * PL은 RESOLVED 상태의 이슈를 CLOSED로 종료한다.
-         * 이슈 상태 흐름이 Controller에 모여 있어 데모 시나리오를 따라가기 쉽다.
-         */
         IssueItem selected = requireSelectedIssue();
         if (selected == null) {
             return;
@@ -189,14 +185,11 @@ public class IssueController {
             return;
         }
 
-        // 여기 수정: 담당자 추천은 PL이 실제로 배정할 수 있는 NEW/REOPENED 이슈에서만 실행한다.
         if (!"NEW".equals(selected.status()) && !"REOPENED".equals(selected.status())) {
-            view.showWarning("담당자 추천은 NEW 또는 REOPENED 상태의 이슈에서 사용할 수 있습니다.");
+            view.showWarning("담당자 추천은 NEW 또는 REOPENED 상태의 이슈에서만 사용할 수 있습니다.");
             return;
         }
 
-        // 여기 수정: backend의 추천 기능을 호출하고, View에는 추천 후보 목록 표시만 맡긴다.
-        // 여기 수정: 추천 후보를 보여주기만 하지 않고, 후보 선택 후 배정 다이얼로그로 이어지게 한다.
         List<String> recommendations = backend.recommendAssignees(selected);
         view.showRecommendationSelectDialog(recommendations).ifPresent(candidate -> {
             List<String> developers = backend.developerLoginIdsForProject(selected.projectId());
@@ -208,29 +201,74 @@ public class IssueController {
     }
 
     private void showStatistics() {
-        String daily = backend.dailyIssueCounts().entrySet().stream()
+        Integer projectId = session.selectedProjectId();
+        String daily = backend.dailyIssueCounts(projectId).entrySet().stream()
                 .map(entry -> entry.getKey() + ": " + entry.getValue())
                 .collect(Collectors.joining("\n"));
+
+        if (daily.isBlank()) {
+            daily = "데이터 없음";
+        }
+
         view.showStatistics(
                 "상태별 요약\n" +
-                        "NEW: " + backend.countByStatus("NEW") + "\n" +
-                        "ASSIGNED: " + backend.countByStatus("ASSIGNED") + "\n" +
-                        "FIXED: " + backend.countByStatus("FIXED") + "\n" +
-                        "RESOLVED: " + backend.countByStatus("RESOLVED") + "\n" +
-                        "CLOSED: " + backend.countByStatus("CLOSED") + "\n\n" +
-                        "일별 발생 횟수\n" + daily
+                        "NEW: " + backend.countByStatus(projectId, "NEW") + "\n" +
+                        "ASSIGNED: " + backend.countByStatus(projectId, "ASSIGNED") + "\n" +
+                        "FIXED: " + backend.countByStatus(projectId, "FIXED") + "\n" +
+                        "RESOLVED: " + backend.countByStatus(projectId, "RESOLVED") + "\n" +
+                        "CLOSED: " + backend.countByStatus(projectId, "CLOSED") + "\n\n" +
+                        "일별 발생 건수\n" + daily
         );
     }
 
     private IssueItem requireSelectedIssue() {
-        /*
-         * 이슈 상세, 배정, 코멘트, 상태 변경 기능은 모두 선택된 이슈가 필요하다.
-         * 중복 검사를 한 메서드로 모아 경고 메시지와 null 처리를 통일했다.
-         */
         IssueItem selected = view.selectedIssue();
         if (selected == null) {
             view.showWarning("먼저 이슈를 선택하세요.");
         }
         return selected;
+    }
+
+    private List<IssueItem> currentProjectIssues() {
+        Integer selectedProjectId = session.selectedProjectId();
+        return backend.issuesForRole(session.loginId(), session.role()).stream()
+                .filter(issue -> selectedProjectId == null || issue.projectId() == selectedProjectId)
+                .toList();
+    }
+
+    private List<ProjectItem> currentProjectItems() {
+        List<ProjectItem> projects = backend.projectsForUser(session.loginId(), session.role());
+        Integer selectedProjectId = session.selectedProjectId();
+        if (selectedProjectId == null) {
+            return projects;
+        }
+
+        return projects.stream()
+                .filter(project -> project.id() == selectedProjectId)
+                .toList();
+    }
+
+    private List<String> projectDeveloperLoginIds() {
+        Integer selectedProjectId = session.selectedProjectId();
+        if (selectedProjectId == null) {
+            return backend.developerLoginIds();
+        }
+
+        return backend.usersForProject(selectedProjectId).stream()
+                .filter(user -> user.role() == UserRole.DEV)
+                .map(UserItem::loginId)
+                .toList();
+    }
+
+    private List<String> projectTesterLoginIds() {
+        Integer selectedProjectId = session.selectedProjectId();
+        if (selectedProjectId == null) {
+            return backend.testerLoginIds();
+        }
+
+        return backend.usersForProject(selectedProjectId).stream()
+                .filter(user -> user.role() == UserRole.TESTER)
+                .map(UserItem::loginId)
+                .toList();
     }
 }

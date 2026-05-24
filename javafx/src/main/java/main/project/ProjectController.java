@@ -17,11 +17,13 @@ public class ProjectController {
     private final ProjectView view;
     private final JavaFxBackend backend;
     private final UserSession session;
+    private final Runnable enterProjectCallback;
 
-    public ProjectController(ProjectView view, JavaFxBackend backend, UserSession session) {
+    public ProjectController(ProjectView view, JavaFxBackend backend, UserSession session, Runnable enterProjectCallback) {
         this.view = view;
         this.backend = backend;
         this.session = session;
+        this.enterProjectCallback = enterProjectCallback;
         bind();
     }
 
@@ -39,6 +41,7 @@ public class ProjectController {
          * ProjectPanel은 이벤트 발생만 알려주고, 실제 처리 순서는 Controller가 담당한다.
          */
         view.onProjectSelected(this::refreshProjectUsers);
+        view.onEnterProject(this::enterProject);
         view.onCreateProject(this::createProject);
         view.onCreateUser(this::createUser);
         view.onProjectDetail(this::showProjectDetail);
@@ -104,6 +107,17 @@ public class ProjectController {
             backend.addUser(form.loginId(), form.password(), form.role(), selectedProject.id());
             refreshProjectUsers();
         });
+    }
+
+    private void enterProject() {
+        ProjectItem selected = view.selectedProject();
+        if (selected == null) {
+            view.showWarning("먼저 프로젝트를 선택하세요.");
+            return;
+        }
+
+        session.selectProject(selected.id(), selected.name());
+        enterProjectCallback.run();
     }
 
     private void showProjectDetail() {

@@ -77,9 +77,10 @@ public class MockJavaFxBackend implements JavaFxBackend {
     }
 
     @Override
-    public int countByStatus(String status) {
+    public int countByStatus(Integer projectId, String status) {
         IssueStatus target = IssueStatus.valueOf(status);
         return (int) database.issues().values().stream()
+                .filter(issueData -> projectId == null || Objects.equals(issueData.projectId(), projectId))
                 .filter(issueData -> issueData.status() == target)
                 .count();
     }
@@ -179,8 +180,8 @@ public class MockJavaFxBackend implements JavaFxBackend {
                 .flatMap(projectId -> issue.getIssueList(new GetIssueListInput(
                         projectId,
                         userIdOf(loginId),
-                        role == UserRole.DEV ? userIdOf(loginId) : null,
-                        role == UserRole.TESTER ? userIdOf(loginId) : null,
+                        null,
+                        null,
                         null,
                         null,
                         null,
@@ -221,9 +222,13 @@ public class MockJavaFxBackend implements JavaFxBackend {
     }
 
     @Override
-    public void reopenIssue(int issueId, String writer, String comment) {
-        issue.changeIssueStatus(new ChangeIssueStatusInput(issueId, adminUserId(), IssueStatus.REOPENED));
+    public String reopenIssue(int issueId, String writer, String comment) {
+        var output = issue.changeIssueStatus(new ChangeIssueStatusInput(issueId, userIdOf(writer), IssueStatus.REOPENED));
+        if (!output.success()) {
+            return output.message();
+        }
         addComment(issueId, writer, comment);
+        return null;
     }
 
     @Override
@@ -248,8 +253,9 @@ public class MockJavaFxBackend implements JavaFxBackend {
     }
 
     @Override
-    public Map<String, Long> dailyIssueCounts() {
+    public Map<String, Long> dailyIssueCounts(Integer projectId) {
         return database.issues().values().stream()
+                .filter(data -> projectId == null || Objects.equals(data.projectId(), projectId))
                 .collect(Collectors.groupingBy(
                         data -> data.reportedDate().toLocalDate().toString(),
                         Collectors.counting()

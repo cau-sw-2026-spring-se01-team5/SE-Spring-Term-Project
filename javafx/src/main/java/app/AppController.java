@@ -5,6 +5,8 @@ import auth.LoginPanel;
 import backend.JavaFxBackend;
 import main.MainController;
 import main.MainPanel;
+import main.project.ProjectController;
+import main.project.ProjectPanel;
 import session.UserSession;
 
 /*
@@ -53,10 +55,23 @@ public class AppController {
          */
         new LoginController(loginPanel, backend, user -> {
             session.login(user.loginId(), user.role());
-            showMainScreen();
+            showProjectSelectScreen();
         });
 
         frame.showLogin(loginPanel);
+    }
+
+    private void showProjectSelectScreen() {
+        ProjectPanel projectPanel = new ProjectPanel(session.role(), false, true);
+        ProjectController projectController = new ProjectController(
+                projectPanel,
+                backend,
+                session,
+                this::showMainScreen
+        );
+
+        projectController.start();
+        frame.showMain(projectPanel);
     }
 
     private void showMainScreen() {

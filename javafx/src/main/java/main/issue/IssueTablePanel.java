@@ -10,12 +10,6 @@ import javafx.scene.layout.VBox;
 
 import java.util.List;
 
-/*
- * 이슈 목록 테이블만 담당하는 하위 패널이다.
- *
- * 테이블 컬럼 구성과 선택된 이슈 조회 책임을 분리해서,
- * IssuePanel은 전체 화면 흐름과 이벤트 처리에 집중하도록 했다.
- */
 class IssueTablePanel extends VBox {
 
     private final TableView<IssueItem> tableView = new TableView<>();

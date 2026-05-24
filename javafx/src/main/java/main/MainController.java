@@ -52,6 +52,10 @@ public class MainController {
         /*
          * 메인 화면에 처음 들어오면 대시보드를 기본 화면으로 보여준다.
          */
+        if (session.selectedProjectId() == null) {
+            showProjects();
+            return;
+        }
         showDashboard();
     }
 
@@ -89,7 +93,7 @@ public class MainController {
          * ProjectController가 프로젝트 생성, 계정 생성, 삭제 요청을 처리한다.
          */
         ProjectPanel projectPanel = new ProjectPanel(session.role());
-        ProjectController projectController = new ProjectController(projectPanel, backend, session);
+        ProjectController projectController = new ProjectController(projectPanel, backend, session, this::showDashboard);
         projectController.start();
         mainPanel.setContent(projectPanel);
     }

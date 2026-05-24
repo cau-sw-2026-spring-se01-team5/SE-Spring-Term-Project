@@ -49,6 +49,8 @@ public interface ProjectView {
 
     void onProjectSelected(Runnable handler);
 
+    void onEnterProject(Runnable handler);
+
     void onCreateProject(Runnable handler);
 
     void onCreateUser(Runnable handler);

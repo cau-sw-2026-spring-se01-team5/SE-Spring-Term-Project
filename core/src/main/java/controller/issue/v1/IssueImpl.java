@@ -286,8 +286,8 @@ public class IssueImpl implements Issue {
         if (!isAdmin) {
             return new ChangeIssueStatusOutput(false, issue.getId(), issue.getStatus(), "ADMIN만 REOPENED 처리할 수 있습니다.");
         }
-        if (issue.getStatus() != IssueStatus.RESOLVED) {
-            return new ChangeIssueStatusOutput(false, issue.getId(), issue.getStatus(), "RESOLVED 상태에서만 REOPENED로 변경할 수 있습니다.");
+        if (issue.getStatus() != IssueStatus.CLOSED) {
+            return new ChangeIssueStatusOutput(false, issue.getId(), issue.getStatus(), "CLOSED 상태에서만 REOPENED로 변경할 수 있습니다.");
         }
         try {
             issue.setStatus(IssueStatus.REOPENED);

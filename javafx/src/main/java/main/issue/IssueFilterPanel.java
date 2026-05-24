@@ -1,5 +1,6 @@
 package main.issue;
 
+import backend.JavaFxBackend.IssueItem;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -8,12 +9,6 @@ import javafx.scene.layout.HBox;
 
 import java.util.List;
 
-/*
- * 이슈 검색 조건만 담당하는 하위 패널이다.
- *
- * IssuePanel에 검색 입력 UI까지 모두 넣으면 목록, 액션, 다이얼로그 코드가 한 파일에 섞인다.
- * 검색 조건 입력 책임을 이 클래스로 분리해서 IssuePanel의 변경 이유를 줄였다.
- */
 class IssueFilterPanel extends HBox {
 
     private static final String ALL_STATUS = "전체상태";
@@ -59,8 +54,6 @@ class IssueFilterPanel extends HBox {
     }
 
     void setAssignees(List<String> assignees) {
-        // 여기 수정: ComboBox 항목을 다시 채울 때 기존 선택값이 사라지면 필터 값이 null이 되어 모든 이슈가 숨겨진다.
-        // 그래서 기존 선택값을 보존하고, 보존할 수 없으면 전체담당자로 되돌린다.
         String selected = assigneeBox.getValue();
         assigneeBox.getItems().setAll(ALL_ASSIGNEE);
         assigneeBox.getItems().addAll(assignees);
@@ -72,8 +65,6 @@ class IssueFilterPanel extends HBox {
     }
 
     void setReporters(List<String> reporters) {
-        // 여기 수정: reporter 필터도 항목 갱신 후 선택값이 null로 바뀌지 않게 한다.
-        // 선택값이 null이면 matches()에서 모든 행이 false가 되어 이슈 목록이 비어 보인다.
         String selected = reporterBox.getValue();
         reporterBox.getItems().setAll(ALL_REPORTER);
         reporterBox.getItems().addAll(reporters);
@@ -88,7 +79,7 @@ class IssueFilterPanel extends HBox {
         searchButton.setOnAction(event -> handler.run());
     }
 
-    boolean matches(backend.JavaFxBackend.IssueItem issue) {
+    boolean matches(IssueItem issue) {
         String keyword = keywordField.getText() == null ? "" : keywordField.getText().trim().toLowerCase();
 
         return (ALL_STATUS.equals(statusBox.getValue()) || issue.status().equals(statusBox.getValue()))
