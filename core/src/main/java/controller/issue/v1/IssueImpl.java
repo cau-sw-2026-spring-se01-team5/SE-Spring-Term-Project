@@ -46,6 +46,14 @@ public class IssueImpl implements Issue {
 
     @Override
     public RegisterIssueOutput registerIssue(RegisterIssueInput input) {
+        if (input.issueTitle() == null || input.issueTitle().isBlank()) {
+            return new RegisterIssueOutput(false, null, "이슈 제목을 입력해야합니다.");
+        }
+
+        if (input.issueDescription() == null || input.issueDescription().isBlank()) {
+            return new RegisterIssueOutput(false, null, "이슈 설명을 입력해야합니다.");
+        }
+
         try {
             domain.User reporter = userRepository.load(input.reporterUserId());
             if (reporter.getRole() != UserRole.TESTER) {
