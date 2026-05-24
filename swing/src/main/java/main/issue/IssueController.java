@@ -142,11 +142,6 @@ public class IssueController {
             return;
         }
 
-        if (form.comment() == null || form.comment().isBlank()) {
-            view.showMessage("comment는 필수 입력값입니다.");
-            return;
-        }
-
         // 입력값을 DTO로 만들어서 이슈 등록 api 호출
         var registerOutput = issueService.registerIssue(
                 new RegisterIssueInput(
@@ -161,18 +156,20 @@ public class IssueController {
         // 백엔드 api 호출 결과 받아옴
         view.showMessage(registerOutput.message());
 
-        // 등록 성공 시 생성된 issueId에 comment도 즉시 등록
+        // 등록 성공 시 comment가 입력된 경우에만 코멘트 등록
         if (registerOutput.success() && registerOutput.issueId() != null) {
-            var commentOutput = issueService.addIssueComment(
-                    new AddIssueCommentInput(
-                            registerOutput.issueId(),
-                            session.userId(),
-                            form.comment()
-                    )
-            );
+            if (form.comment() != null && !form.comment().isBlank()) {
+                var commentOutput = issueService.addIssueComment(
+                        new AddIssueCommentInput(
+                                registerOutput.issueId(),
+                                session.userId(),
+                                form.comment()
+                        )
+                );
 
-            if (!commentOutput.success()) {
-                view.showMessage("이슈 등록 성공 but 코멘트 등록 실패: " + commentOutput.message());
+                if (!commentOutput.success()) {
+                    view.showMessage("이슈 등록 성공 but 코멘트 등록 실패: " + commentOutput.message());
+                }
             }
 
             loadAllIssues();

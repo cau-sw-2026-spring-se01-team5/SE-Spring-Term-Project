@@ -45,7 +45,7 @@ class IssueCreatePanel {
         panel.add(formPanel, BorderLayout.NORTH);
 
         JPanel commentPanel = new JPanel(new BorderLayout(0, 6));
-        commentPanel.add(new JLabel("Comment *"), BorderLayout.NORTH);
+        commentPanel.add(new JLabel("Comment"), BorderLayout.NORTH);
         commentPanel.add(commentScroll, BorderLayout.CENTER);
         panel.add(commentPanel, BorderLayout.CENTER);
 

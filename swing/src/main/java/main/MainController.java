@@ -11,7 +11,6 @@ import main.user.UserController;
 import main.user.UserView;
 import project.v1.Project;
 import session.UserSession;
-import statistics.v1.Statistics;
 import user.v1.User;
 
 // main화면에 필요한 개별 controller를 모두 합침
@@ -31,7 +30,6 @@ public class MainController {
             Project projectService,
             User userService,
             Issue issueService,
-            Statistics statisticsService,
             Auth authService,
 
             UserSession session,
@@ -61,8 +59,7 @@ public class MainController {
 
         this.statisticsController = new StatisticsController(
                 headerView,
-                statisticsService,
-                session
+                issueView
         );
 
         headerView.onOpenStatistics(statisticsController::openStatistics);

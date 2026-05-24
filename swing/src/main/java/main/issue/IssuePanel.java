@@ -27,6 +27,11 @@ public class IssuePanel extends JPanel implements IssueView {
         issueListPanel.setIssues(issues);
     }
 
+    @Override
+    public List<IssueSummaryOutput> getVisibleIssues() {
+        return issueListPanel.getVisibleIssues();
+    }
+
     // 현재 선택된 이슈 ID 반환
     @Override
     public Integer getSelectedIssueId() {
