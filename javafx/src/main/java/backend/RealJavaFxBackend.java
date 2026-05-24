@@ -44,6 +44,7 @@ import user.v1.User;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -394,7 +395,7 @@ public class RealJavaFxBackend implements JavaFxBackend {
     }
 
     private static void initSchema(Connection connection) throws Exception {
-        String schema = Files.readString(Path.of("core/src/main/java/repository/sqlite/schema.sql"));
+        String schema = Files.readString(resolveSchemaPath());
         for (String raw : schema.split(";")) {
             String sql = raw.trim();
             if (sql.isEmpty()) {
@@ -404,6 +405,24 @@ public class RealJavaFxBackend implements JavaFxBackend {
                 statement.execute(sql);
             }
         }
+    }
+
+    private static Path resolveSchemaPath() throws Exception {
+        Path[] candidates = new Path[]{
+                Paths.get("core", "src", "main", "java", "repository", "sqlite", "schema.sql"),
+                Paths.get("..", "core", "src", "main", "java", "repository", "sqlite", "schema.sql"),
+                Paths.get(System.getProperty("user.dir"), "core", "src", "main", "java", "repository", "sqlite", "schema.sql"),
+                Paths.get(System.getProperty("user.dir"), "..", "core", "src", "main", "java", "repository", "sqlite", "schema.sql")
+        };
+
+        for (Path candidate : candidates) {
+            Path normalized = candidate.normalize();
+            if (Files.exists(normalized)) {
+                return normalized;
+            }
+        }
+
+        throw new java.nio.file.NoSuchFileException("core/src/main/java/repository/sqlite/schema.sql");
     }
 
     private static void seedDefaultAdmin(Connection connection) throws Exception {
