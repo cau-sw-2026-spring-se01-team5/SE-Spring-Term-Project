@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="its-use-cases" name="ITS Use Cases">
-        <mxGraphModel dx="1256" dy="1110" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1480" pageHeight="1040" math="0" shadow="0">
+        <mxGraphModel dx="700" dy="777" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1480" pageHeight="1040" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -37,13 +37,13 @@
                 <mxCell id="uc6" value="UC6&lt;br&gt;이슈 종료처리" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
                     <mxGeometry x="1230" y="387" width="200" height="66" as="geometry"/>
                 </mxCell>
-                <mxCell id="uc7" value="&lt;font color=&quot;#000000&quot;&gt;UC7&lt;br&gt;이슈 브라우즈 (include)&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                <mxCell id="uc7" value="&lt;font color=&quot;#000000&quot;&gt;UC7&lt;br&gt;이슈 브라우즈 (include)&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" parent="1" vertex="1">
                     <mxGeometry x="900" y="484" width="260" height="72" as="geometry"/>
                 </mxCell>
-                <mxCell id="uc9" value="UC9&lt;br&gt;담당자 후보 추천 (extend)" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                <mxCell id="uc9" value="UC9&lt;br&gt;담당자 후보 추천 (extend)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
                     <mxGeometry x="980" y="43" width="220" height="70" as="geometry"/>
                 </mxCell>
-                <mxCell id="uc10" value="UC10&lt;br&gt;통계 분석 (extend)" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                <mxCell id="uc10" value="UC10&lt;br&gt;통계 분석 (extend)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
                     <mxGeometry x="920" y="640" width="220" height="70" as="geometry"/>
                 </mxCell>
                 <mxCell id="e_admin_uc1" style="html=1;rounded=0;strokeWidth=1;endArrow=classic;startArrow=none;" parent="1" source="actor_admin" target="uc1" edge="1">
@@ -109,7 +109,7 @@
                         <mxPoint as="offset"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="uc8" value="UC8&lt;br&gt;코멘트 추가&amp;nbsp;(include)" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                <mxCell id="uc8" value="UC8&lt;br&gt;코멘트 추가&amp;nbsp;(include)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" parent="1" vertex="1">
                     <mxGeometry x="880" y="186" width="180" height="64" as="geometry"/>
                 </mxCell>
             </root>
