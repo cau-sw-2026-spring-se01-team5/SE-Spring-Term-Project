@@ -43,173 +43,169 @@ import java.sql.Statement;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SwingInterfaceJunitTest {
 
-    // 테스트용 임시 폴더
     @TempDir
     Path tempDir;
 
-    // 로그인 + 권한 조회 테스트
     @Test
     void loginAndRoleResolverTest() throws Exception {
-        // 임시 db 파일 기반으로 서비스 객체 생성
-        AppServices services = concatServices(tempDir.resolve("it-1.db"));
+        try (TestServices testServices = concatServices(tempDir.resolve("it-1.db"))) {
+            AppServices services = testServices.services();
 
-        Auth auth = services.auth();
-        RoleResolver roleResolver = services.roleResolver();
+            Auth auth = services.auth();
+            RoleResolver roleResolver = services.roleResolver();
 
-        // 기본 admin 계정으로 로그인 시도
-        LoginOutput output = auth.login(new LoginInput("admin", "1234"));
+            LoginOutput output = auth.login(new LoginInput("admin", "1234"));
 
-        assertTrue(output.success()); // 로그인 성공 여부
-        assertNotNull(output.userId()); // userId 존재 여부
-
-        // userName과 role을 제대로 가져오는지
-        assertEquals(UserRole.ADMIN, roleResolver.resolveRole(output.userId()));
-        assertEquals("admin", roleResolver.resolveLoginId(output.userId()));
+            assertTrue(output.success());
+            assertNotNull(output.userId());
+            assertEquals(UserRole.ADMIN, roleResolver.resolveRole(output.userId()));
+            assertEquals("admin", roleResolver.resolveLoginId(output.userId()));
+        }
     }
 
-    // 프로젝트 인터페이스와 user 인터페이스 동작 여부
     @Test
     void projectAndUserTest() throws Exception {
-        // 테스트 db 생성
-        AppServices services = concatServices(tempDir.resolve("it-2.db"));
+        try (TestServices testServices = concatServices(tempDir.resolve("it-2.db"))) {
+            AppServices services = testServices.services();
 
-        Auth auth = services.auth();
-        Project project = services.project();
-        User user = services.user();
+            Auth auth = services.auth();
+            Project project = services.project();
+            User user = services.user();
 
-        // admin 로그인
-        LoginOutput login = auth.login(new LoginInput("admin", "1234"));
-        assertTrue(login.success());
+            LoginOutput login = auth.login(new LoginInput("admin", "1234"));
+            assertTrue(login.success());
 
-        var projectList = project.getProjectList(new GetProjectListInput(login.userId())); // 현재 로그인한 admin기준 프로젝트 조회
-        assertTrue(projectList.success()); // 프로젝트 리스트 조회 판단
-        assertNotNull(projectList.projectList()); // 목록 존재 여부 판단
-        assertTrue(projectList.projectList().stream().anyMatch(p -> p.projectId() == 1)); // 기본 프로젝트 포함 여부
+            var projectList = project.getProjectList(new GetProjectListInput(login.userId()));
+            assertTrue(projectList.success());
+            assertNotNull(projectList.projectList());
+            assertTrue(projectList.projectList().stream().anyMatch(p -> p.projectId() == 1));
 
-        var userInfo = user.getUserInfo(new GetUserInfoInput(login.userId(), 1)); // admin 유저 정보 조회
-        assertTrue(userInfo.success()); // 유저 정보 가져와지는지
-        assertEquals("admin", userInfo.loginId()); // 정확한 이름 가져오는지
-        assertEquals(UserRole.ADMIN, userInfo.role()); // 정확한 역할 가져오는지
+            var userInfo = user.getUserInfo(new GetUserInfoInput(login.userId(), 1));
+            assertTrue(userInfo.success());
+            assertEquals("admin", userInfo.loginId());
+            assertEquals(UserRole.ADMIN, userInfo.role());
+        }
     }
 
     @Test
     void issueTest() throws Exception {
-        // 테스트 db 생성
-        AppServices services = concatServices(tempDir.resolve("it-3.db"));
+        try (TestServices testServices = concatServices(tempDir.resolve("it-3.db"))) {
+            AppServices services = testServices.services();
 
-        Auth auth = services.auth();
-        User user = services.user();
-        Issue issue = services.issue();
+            Auth auth = services.auth();
+            User user = services.user();
+            Issue issue = services.issue();
 
-        LoginOutput adminLogin = auth.login(new LoginInput("admin", "1234"));
-        assertTrue(adminLogin.success());
+            LoginOutput adminLogin = auth.login(new LoginInput("admin", "1234"));
+            assertTrue(adminLogin.success());
 
-        // admin 권한으로 tester 계정 생성
-        var testerCreate = user.createUser(new CreateUserInput(
-                adminLogin.userId(),
-                "tester-it",
-                "1234",
-                UserRole.TESTER,
-                1
-        ));
+            var testerCreate = user.createUser(new CreateUserInput(
+                    adminLogin.userId(),
+                    "tester-it",
+                    "1234",
+                    UserRole.TESTER,
+                    1
+            ));
 
-        assertTrue(testerCreate.success()); // 생성 성공 여부
-        assertNotNull(testerCreate.createdUserId()); // userId 확인
+            assertTrue(testerCreate.success());
+            assertNotNull(testerCreate.createdUserId());
 
-        // tester 계정으로 이슈 등록
-        var register = issue.registerIssue(new RegisterIssueInput(
-                1,
-                "이슈 제목 테스트용",
-                "core 연동 확인용 이슈",
-                IssuePriority.MAJOR,
-                testerCreate.createdUserId()
-        ));
+            var register = issue.registerIssue(new RegisterIssueInput(
+                    1,
+                    "이슈 제목 테스트용",
+                    "core 연동 확인용 이슈",
+                    IssuePriority.MAJOR,
+                    testerCreate.createdUserId()
+            ));
 
-        assertTrue(register.success()); // 이슈 등록 성공 여부
-        assertNotNull(register.issueId()); // issueId 잘 가져와지는지
+            assertTrue(register.success());
+            assertNotNull(register.issueId());
 
-        // 등록한 이슈 상세 조회
-        var detail = issue.getIssueDetail(new GetIssueDetailInput(register.issueId()));
-        assertTrue(detail.success()); // 조회 성공
-        assertEquals("이슈 제목 테스트용", detail.issueTitle()); // 제목 일치 여부 검증
+            var detail = issue.getIssueDetail(new GetIssueDetailInput(register.issueId()));
+            assertTrue(detail.success());
+            assertEquals("이슈 제목 테스트용", detail.issueTitle());
 
-        // 테스트 프로젝트1의 전체 이슈 목록 조회
-        var list = issue.getIssueList(new GetIssueListInput(
-                1,
-                adminLogin.userId(),
-                null,
-                null,
-                null,
-                null,
-                null,
-                null
-        ));
-        assertTrue(list.success()); // 조회 성공 여부
-        assertTrue(list.issues().stream().anyMatch(i -> i.issueId().equals(register.issueId())));
+            var list = issue.getIssueList(new GetIssueListInput(
+                    1,
+                    adminLogin.userId(),
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
+            ));
+            assertTrue(list.success());
+            assertTrue(list.issues().stream().anyMatch(i -> i.issueId().equals(register.issueId())));
+        }
     }
 
     @Test
     void statisticsTest() throws Exception {
-        AppServices services = concatServices(tempDir.resolve("it-4.db"));
+        try (TestServices testServices = concatServices(tempDir.resolve("it-4.db"))) {
+            AppServices services = testServices.services();
 
-        Auth auth = services.auth();
-        User user = services.user();
-        Issue issue = services.issue();
+            Auth auth = services.auth();
+            User user = services.user();
+            Issue issue = services.issue();
 
-        LoginOutput adminLogin = auth.login(new LoginInput("admin", "1234"));
-        assertTrue(adminLogin.success());
+            LoginOutput adminLogin = auth.login(new LoginInput("admin", "1234"));
+            assertTrue(adminLogin.success());
 
-        var testerCreate = user.createUser(new CreateUserInput(
-                adminLogin.userId(),
-                "tester-stat",
-                "1234",
-                UserRole.TESTER,
-                1
-        ));
-        assertTrue(testerCreate.success());
+            var testerCreate = user.createUser(new CreateUserInput(
+                    adminLogin.userId(),
+                    "tester-stat",
+                    "1234",
+                    UserRole.TESTER,
+                    1
+            ));
+            assertTrue(testerCreate.success());
 
-        var register = issue.registerIssue(new RegisterIssueInput(
-                1,
-                "통계 테스트 이슈",
-                "상태별/일별 통계 검증용",
-                IssuePriority.MAJOR,
-                testerCreate.createdUserId()
-        ));
-        assertTrue(register.success());
+            var register = issue.registerIssue(new RegisterIssueInput(
+                    1,
+                    "통계 테스트 이슈",
+                    "상태별 일일 통계 검증용",
+                    IssuePriority.MAJOR,
+                    testerCreate.createdUserId()
+            ));
+            assertTrue(register.success());
 
-        var list = issue.getIssueList(new GetIssueListInput(
-                1,
-                adminLogin.userId(),
-                null,
-                null,
-                null,
-                null,
-                null,
-                null
-        ));
-        assertTrue(list.success());
-        assertNotNull(list.issues());
-        assertFalse(list.issues().isEmpty());
+            var list = issue.getIssueList(new GetIssueListInput(
+                    1,
+                    adminLogin.userId(),
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
+            ));
+            assertTrue(list.success());
+            assertNotNull(list.issues());
+            assertFalse(list.issues().isEmpty());
 
-        long newCount = list.issues().stream()
-                .filter(summary -> summary.status() == IssueStatus.NEW)
-                .count();
-        assertTrue(newCount >= 1);
+            long newCount = list.issues().stream()
+                    .filter(summary -> summary.status() == IssueStatus.NEW)
+                    .count();
+            assertTrue(newCount >= 1);
 
-        Map<String, Long> daily = list.issues().stream()
-                .collect(Collectors.groupingBy(
-                        summary -> summary.reportedDate().toLocalDate().toString(),
-                        Collectors.counting()
-                ));
-        assertFalse(daily.isEmpty());
+            Map<String, Long> daily = list.issues().stream()
+                    .collect(Collectors.groupingBy(
+                            summary -> summary.reportedDate().toLocalDate().toString(),
+                            Collectors.counting()
+                    ));
+            assertFalse(daily.isEmpty());
+        }
     }
 
-    // 테스트에 필요한 서비스 합치는 메서드
-    private static AppServices concatServices(Path dbPath) throws Exception {
+    private static TestServices concatServices(Path dbPath) throws Exception {
         Connection connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath.toAbsolutePath());
         initSchema(connection);
         addDefaultData(connection);
@@ -230,10 +226,10 @@ class SwingInterfaceJunitTest {
                 commentRepository,
                 recommendationRepository
         );
-        return new AppServices(auth, project, user, roleResolver, issue);
+
+        return new TestServices(new AppServices(auth, project, user, roleResolver, issue), connection);
     }
 
-    // 테스트 db에 테이블 만드는 메서드
     private static void initSchema(Connection connection) throws Exception {
         Path schemaPath = resolveSchemaPath();
         String schema = Files.readString(schemaPath);
@@ -250,7 +246,6 @@ class SwingInterfaceJunitTest {
         }
     }
 
-    // 디비 스키마 찾기
     private static Path resolveSchemaPath() {
         Path direct = Path.of("core/src/main/java/repository/sqlite/schema.sql");
         if (Files.exists(direct)) {
@@ -265,7 +260,6 @@ class SwingInterfaceJunitTest {
         throw new IllegalStateException("schema.sql 경로를 찾을 수 없습니다.");
     }
 
-    // 테스트용 기본 데이터 넣기
     private static void addDefaultData(Connection connection) throws Exception {
         try (PreparedStatement project = connection.prepareStatement(
                 "INSERT OR IGNORE INTO projects(id, name) VALUES (1, ?)")
@@ -290,6 +284,13 @@ class SwingInterfaceJunitTest {
             membership.setString(1, "admin");
             membership.setInt(2, 1);
             membership.executeUpdate();
+        }
+    }
+
+    private record TestServices(AppServices services, Connection connection) implements AutoCloseable {
+        @Override
+        public void close() throws Exception {
+            connection.close();
         }
     }
 }
