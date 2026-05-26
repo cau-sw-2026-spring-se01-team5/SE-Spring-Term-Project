@@ -1,12 +1,12 @@
 package main.project;
 
-import backend.JavaFxBackend.UserItem;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import model.JavaFxData.UserItem;
 
 import java.util.List;
 

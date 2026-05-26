@@ -1,45 +1,41 @@
 package main.project;
 
-import backend.JavaFxBackend;
-import backend.JavaFxBackend.ProjectItem;
-import backend.JavaFxBackend.UserItem;
+import app.JavaFxMapper;
+import app.JavaFxServices;
 import enums.user.v1.UserRole;
+import model.JavaFxData.ProjectItem;
+import model.JavaFxData.UserItem;
+import project.dto.createProject.v1.CreateProjectInput;
+import project.dto.deleteProject.v1.DeleteProjectInput;
+import project.dto.getProjectList.v1.GetProjectListInput;
 import session.UserSession;
+import user.dto.createUser.v1.CreateUserInput;
+import user.dto.deleteUser.v1.DeleteUserInput;
+import user.dto.getProjectUserList.v1.GetProjectUserListInput;
 
-/*
- * 프로젝트/계정 기능의 사용자 이벤트를 처리하는 Controller이다.
- *
- * ProjectPanel은 화면과 입력만 담당하고, 프로젝트 생성/삭제와 계정 생성/삭제는 이 Controller가
- * JavaFxBackend에 요청한다. Swing의 UserController/ProjectSelectController와 같은 분리 의도이다.
- */
+import java.util.ArrayList;
+import java.util.List;
+
 public class ProjectController {
 
     private final ProjectView view;
-    private final JavaFxBackend backend;
+    private final JavaFxServices services;
     private final UserSession session;
     private final Runnable enterProjectCallback;
 
-    public ProjectController(ProjectView view, JavaFxBackend backend, UserSession session, Runnable enterProjectCallback) {
+    public ProjectController(ProjectView view, JavaFxServices services, UserSession session, Runnable enterProjectCallback) {
         this.view = view;
-        this.backend = backend;
+        this.services = services;
         this.session = session;
         this.enterProjectCallback = enterProjectCallback;
         bind();
     }
 
     public void start() {
-        /*
-         * 프로젝트 화면이 열리면 먼저 현재 사용자가 볼 수 있는 프로젝트 목록을 불러온다.
-         * admin은 전체 프로젝트를 보고, 일반 사용자는 자신이 속한 프로젝트만 본다.
-         */
         refreshProjects();
     }
 
     private void bind() {
-        /*
-         * View의 버튼/선택 이벤트를 Controller 메서드에 연결한다.
-         * ProjectPanel은 이벤트 발생만 알려주고, 실제 처리 순서는 Controller가 담당한다.
-         */
         view.onProjectSelected(this::refreshProjectUsers);
         view.onEnterProject(this::enterProject);
         view.onCreateProject(this::createProject);
@@ -53,46 +49,55 @@ public class ProjectController {
     }
 
     private void refreshProjects() {
-        /*
-         * 역할에 따라 프로젝트 조회 범위를 다르게 한다.
-         * 이 조건을 View에 두지 않아 화면 클래스가 권한 판단 책임을 갖지 않게 했다.
-         */
-        view.setProjects(session.role() == UserRole.ADMIN
-                ? backend.projects()
-                : backend.projectsForUser(session.loginId(), session.role()));
+        var output = services.project().getProjectList(new GetProjectListInput(session.userId()));
+        if (!output.success()) {
+            view.showWarning(output.message());
+            view.setProjects(List.of());
+            view.clearUsers();
+            return;
+        }
+
+        List<ProjectItem> projects = output.projectList().stream()
+                .map(JavaFxMapper::projectItem)
+                .toList();
+        view.setProjects(projects);
         refreshProjectUsers();
     }
 
     private void refreshProjectUsers() {
-        /*
-         * 왼쪽 프로젝트 목록에서 선택된 프로젝트가 바뀌면 오른쪽 계정 목록도 갱신한다.
-         * 프로젝트와 계정의 소속 관계를 화면에 항상 맞춰 보여주기 위한 처리이다.
-         */
         ProjectItem selected = view.selectedProject();
         if (selected == null) {
             view.clearUsers();
             return;
         }
-        view.setUsers(backend.usersForProject(selected.id()));
+
+        var output = services.user().getProjectUserList(new GetProjectUserListInput(selected.id()));
+        if (!output.success()) {
+            view.showWarning(output.message());
+            view.clearUsers();
+            return;
+        }
+
+        view.setUsers(output.userList().stream().map(JavaFxMapper::userItem).toList());
     }
 
     private void createProject() {
-        /*
-         * 프로젝트 생성 다이얼로그는 View가 띄우고,
-         * 생성 요청과 목록 갱신은 Controller가 처리한다.
-         */
         view.showCreateProjectDialog().ifPresent(form -> {
-            ProjectItem project = backend.addProject(form.name(), form.description());
+            var output = services.project().createProject(new CreateProjectInput(form.name()));
+            if (!output.success()) {
+                view.showWarning(output.message());
+                return;
+            }
+
             refreshProjects();
-            view.selectProject(project);
+            projects().stream()
+                    .filter(project -> project.id().equals(output.projectId()))
+                    .findFirst()
+                    .ifPresent(view::selectProject);
         });
     }
 
     private void createUser() {
-        /*
-         * 계정은 반드시 선택된 프로젝트에 소속되어 생성된다.
-         * 따라서 먼저 프로젝트 선택 여부를 확인하고, 중복 ID도 Controller에서 검사한다.
-         */
         ProjectItem selectedProject = view.selectedProject();
         if (selectedProject == null) {
             view.showWarning("먼저 계정을 추가할 프로젝트를 선택하세요.");
@@ -100,11 +105,22 @@ public class ProjectController {
         }
 
         view.showCreateUserDialog(selectedProject).ifPresent(form -> {
-            if (backend.hasLoginId(form.loginId())) {
+            if (hasLoginId(form.loginId())) {
                 view.showWarning("이미 존재하는 계정 ID입니다.");
                 return;
             }
-            backend.addUser(form.loginId(), form.password(), form.role(), selectedProject.id());
+
+            var output = services.user().createUser(new CreateUserInput(
+                    session.userId(),
+                    form.loginId(),
+                    form.password(),
+                    form.role(),
+                    selectedProject.id()
+            ));
+            if (!output.success()) {
+                view.showWarning(output.message());
+                return;
+            }
             refreshProjectUsers();
         });
     }
@@ -130,30 +146,32 @@ public class ProjectController {
     }
 
     private void deleteProject() {
-        /*
-         * 프로젝트 삭제 후에는 프로젝트 목록과 계정 목록을 다시 불러온다.
-         * 삭제된 프로젝트의 계정 목록이 화면에 남지 않게 하기 위한 처리이다.
-         */
         ProjectItem selected = view.selectedProject();
         if (selected == null) {
             view.showWarning("먼저 프로젝트를 선택하세요.");
             return;
         }
-        backend.deleteProject(selected.id());
+
+        var output = services.project().deleteProject(new DeleteProjectInput(session.userId(), selected.id()));
+        if (!output.success()) {
+            view.showWarning(output.message());
+            return;
+        }
         refreshProjects();
     }
 
     private void deleteUser() {
-        /*
-         * 계정 삭제 후에는 선택된 프로젝트의 계정 목록만 다시 갱신한다.
-         * 전체 프로젝트 목록을 다시 가져올 필요가 없으므로 갱신 범위를 좁혔다.
-         */
         UserItem selected = view.selectedUser();
         if (selected == null) {
             view.showWarning("먼저 계정을 선택하세요.");
             return;
         }
-        backend.deleteUser(selected.loginId());
+
+        var output = services.user().deleteUser(new DeleteUserInput(session.userId(), selected.id(), selected.projectId()));
+        if (!output.success()) {
+            view.showWarning(output.message());
+            return;
+        }
         refreshProjectUsers();
     }
 
@@ -177,5 +195,24 @@ public class ProjectController {
 
     private void showMyRole() {
         view.showMyRole(session.loginId(), session.role());
+    }
+
+    private List<ProjectItem> projects() {
+        var output = services.project().getProjectList(new GetProjectListInput(session.userId()));
+        if (!output.success()) {
+            return List.of();
+        }
+        return output.projectList().stream().map(JavaFxMapper::projectItem).toList();
+    }
+
+    private boolean hasLoginId(String loginId) {
+        List<UserItem> users = new ArrayList<>();
+        for (ProjectItem project : projects()) {
+            var output = services.user().getProjectUserList(new GetProjectUserListInput(project.id()));
+            if (output.success()) {
+                users.addAll(output.userList().stream().map(JavaFxMapper::userItem).toList());
+            }
+        }
+        return users.stream().anyMatch(user -> user.loginId().equals(loginId));
     }
 }

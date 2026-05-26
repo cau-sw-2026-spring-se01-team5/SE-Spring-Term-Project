@@ -11,21 +11,28 @@ import enums.user.v1.UserRole;
  */
 public class UserSession {
 
+    private Integer userId;
     private String loginId;
     private UserRole role;
     private Integer selectedProjectId;
     private String selectedProjectTitle;
 
-    public void login(String loginId, UserRole role) {
+    public void login(Integer userId, String loginId, UserRole role) {
+        this.userId = userId;
         this.loginId = loginId;
         this.role = role;
     }
 
     public void logout() {
+        this.userId = null;
         this.loginId = null;
         this.role = null;
         this.selectedProjectId = null;
         this.selectedProjectTitle = null;
+    }
+
+    public Integer userId() {
+        return userId;
     }
 
     public String loginId() {
