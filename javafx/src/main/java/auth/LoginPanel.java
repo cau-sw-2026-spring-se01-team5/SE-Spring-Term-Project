@@ -1,6 +1,5 @@
 package auth;
 
-import backend.JavaFxBackend;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -10,21 +9,17 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import model.JavaFxData.LoginUser;
 
 import java.util.function.Consumer;
 
-/*
- * 실제 JavaFX 로그인 화면이다.
- *
- * 이 클래스는 입력 필드와 버튼 같은 화면 요소만 담당한다.
- * 로그인 성공 여부 판단은 LoginController가 담당하므로, UI와 처리 로직을 분리할 수 있다.
- */
 public class LoginPanel extends BorderPane implements LoginView {
 
     private final TextField idField = new TextField();
     private final PasswordField passwordField = new PasswordField();
     private final Label messageLabel = new Label();
-    private Consumer<JavaFxBackend.LoginUser> loginSuccessHandler;
+    private Consumer<LoginUser> loginSuccessHandler;
+    private Runnable loginHandler;
 
     public LoginPanel() {
         setStyle("-fx-background-color: #f4f6f8;");
@@ -44,7 +39,7 @@ public class LoginPanel extends BorderPane implements LoginView {
         Label title = new Label("이슈 관리 시스템");
         title.setStyle("-fx-font-size: 26px; -fx-font-weight: bold;");
 
-        Label subtitle = new Label("초기 관리자 계정: admin / admin");
+        Label subtitle = new Label("기본 관리자 계정: admin / 1234");
         subtitle.setStyle("-fx-font-size: 13px; -fx-text-fill: #6b7280;");
 
         idField.setPromptText("아이디");
@@ -65,7 +60,7 @@ public class LoginPanel extends BorderPane implements LoginView {
                         "-fx-font-weight: bold;" +
                         "-fx-background-radius: 8;"
         );
-        loginButton.setOnAction(e -> {
+        loginButton.setOnAction(event -> {
             if (loginHandler != null) {
                 loginHandler.run();
             }
@@ -77,8 +72,6 @@ public class LoginPanel extends BorderPane implements LoginView {
         center.setPadding(new Insets(40));
         setCenter(center);
     }
-
-    private Runnable loginHandler;
 
     @Override
     public String getLoginId() {
@@ -106,11 +99,11 @@ public class LoginPanel extends BorderPane implements LoginView {
     }
 
     @Override
-    public void onLoginSuccess(Consumer<JavaFxBackend.LoginUser> handler) {
+    public void onLoginSuccess(Consumer<LoginUser> handler) {
         this.loginSuccessHandler = handler;
     }
 
-    public void moveToMain(JavaFxBackend.LoginUser user) {
+    public void moveToMain(LoginUser user) {
         if (loginSuccessHandler != null) {
             loginSuccessHandler.accept(user);
         }

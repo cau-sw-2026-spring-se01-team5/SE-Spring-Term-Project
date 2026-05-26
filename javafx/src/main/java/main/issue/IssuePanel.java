@@ -1,8 +1,5 @@
 package main.issue;
 
-import backend.JavaFxBackend.CommentItem;
-import backend.JavaFxBackend.IssueItem;
-import backend.JavaFxBackend.ProjectItem;
 import enums.user.v1.UserRole;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -17,6 +14,9 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import model.JavaFxData.CommentItem;
+import model.JavaFxData.IssueItem;
+import model.JavaFxData.ProjectItem;
 import ui.UiDialog;
 
 import java.util.List;
@@ -83,6 +83,11 @@ public class IssuePanel extends VBox implements IssueView {
     }
 
     @Override
+    public List<IssueItem> visibleIssues() {
+        return tablePanel.visibleIssues();
+    }
+
+    @Override
     public boolean matchesFilter(IssueItem issue) {
         return filterPanel.matches(issue);
     }
@@ -129,7 +134,7 @@ public class IssuePanel extends VBox implements IssueView {
             if (!button.getButtonData().isDefaultButton()) {
                 return null;
             }
-            if (titleField.getText().isBlank() || descriptionArea.getText().isBlank() || commentArea.getText().isBlank()) {
+            if (titleField.getText().isBlank() || descriptionArea.getText().isBlank()) {
                 UiDialog.showWarning("제목, 설명, 코멘트는 모두 입력해야 합니다.");
                 return null;
             }

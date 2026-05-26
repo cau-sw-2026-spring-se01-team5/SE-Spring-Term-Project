@@ -1,23 +1,20 @@
 package auth;
 
-import backend.JavaFxBackend;
+import app.JavaFxServices;
+import auth.dto.login.v1.LoginInput;
+import auth.dto.login.v1.LoginOutput;
+import model.JavaFxData.LoginUser;
 
 import java.util.function.Consumer;
 
-/*
- * 로그인 화면의 이벤트 처리를 담당하는 컨트롤러이다.
- *
- * Panel은 입력값을 제공하고 메시지를 표시하는 역할만 맡는다.
- * 실제 로그인 요청과 성공/실패 판단은 이 컨트롤러가 JavaFxBackend를 통해 처리한다.
- */
 public class LoginController {
 
     private final LoginView view;
-    private final JavaFxBackend backend;
+    private final JavaFxServices services;
 
-    public LoginController(LoginView view, JavaFxBackend backend, Consumer<JavaFxBackend.LoginUser> successHandler) {
+    public LoginController(LoginView view, JavaFxServices services, Consumer<LoginUser> successHandler) {
         this.view = view;
-        this.backend = backend;
+        this.services = services;
         this.view.onLoginSuccess(successHandler);
         bind();
     }
@@ -35,16 +32,23 @@ public class LoginController {
             return;
         }
 
-        backend.login(loginId, password).ifPresentOrElse(
-                user -> {
-                    if (view instanceof LoginPanel panel) {
-                        panel.moveToMain(user);
-                    }
-                },
-                () -> {
-                    view.showMessage("아이디 또는 비밀번호가 올바르지 않습니다.");
-                    view.clearPassword();
-                }
+        LoginOutput output = services.auth().login(new LoginInput(loginId, password));
+        if (!output.success() || output.userId() == null) {
+            view.showMessage(output.message() == null || output.message().isBlank()
+                    ? "아이디 또는 비밀번호가 올바르지 않습니다."
+                    : output.message());
+            view.clearPassword();
+            return;
+        }
+
+        LoginUser user = new LoginUser(
+                output.userId(),
+                services.roleResolver().resolveLoginId(output.userId()),
+                services.roleResolver().resolveRole(output.userId())
         );
+
+        if (view instanceof LoginPanel panel) {
+            panel.moveToMain(user);
+        }
     }
 }

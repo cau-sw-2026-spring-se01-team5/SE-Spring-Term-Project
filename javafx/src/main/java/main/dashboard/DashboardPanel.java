@@ -1,6 +1,7 @@
 package main.dashboard;
 
-import backend.JavaFxBackend;
+import app.JavaFxServices;
+import enums.issue.v1.IssueStatus;
 import enums.user.v1.UserRole;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -12,6 +13,8 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import session.UserSession;
+import statistics.dto.countByStatus.v1.CountByStatusInput;
+import statistics.dto.getDailyIssueCounts.v1.GetDailyIssueCountsInput;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -19,13 +22,13 @@ import java.util.stream.Collectors;
 
 public class DashboardPanel extends VBox {
 
-    private final JavaFxBackend backend;
+    private final JavaFxServices services;
     private final UserSession session;
     private final Runnable showIssues;
     private final Runnable showProjects;
 
-    public DashboardPanel(JavaFxBackend backend, UserSession session, Runnable showIssues, Runnable showProjects) {
-        this.backend = backend;
+    public DashboardPanel(JavaFxServices services, UserSession session, Runnable showIssues, Runnable showProjects) {
+        this.services = services;
         this.session = session;
         this.showIssues = showIssues;
         this.showProjects = showProjects;
@@ -52,7 +55,7 @@ public class DashboardPanel extends VBox {
         summary.getChildren().addAll(
                 metricCard("NEW", String.valueOf(statusCounts.get("NEW")), "PL 배정 대기"),
                 metricCard("ASSIGNED", String.valueOf(statusCounts.get("ASSIGNED")), "개발 처리 중"),
-                metricCard("FIXED", String.valueOf(statusCounts.get("FIXED")), "테스트 검증 대기"),
+                metricCard("FIXED", String.valueOf(statusCounts.get("FIXED")), "테스터 검증 대기"),
                 metricCard("RESOLVED", String.valueOf(statusCounts.get("RESOLVED")), "PL 종료 대기"),
                 metricCard("CLOSED", String.valueOf(statusCounts.get("CLOSED")), "완료 이력")
         );
@@ -78,16 +81,27 @@ public class DashboardPanel extends VBox {
     private Map<String, Integer> statusCounts() {
         Integer projectId = session.selectedProjectId();
         Map<String, Integer> counts = new LinkedHashMap<>();
-        counts.put("NEW", backend.countByStatus(projectId, "NEW"));
-        counts.put("ASSIGNED", backend.countByStatus(projectId, "ASSIGNED"));
-        counts.put("FIXED", backend.countByStatus(projectId, "FIXED"));
-        counts.put("RESOLVED", backend.countByStatus(projectId, "RESOLVED"));
-        counts.put("CLOSED", backend.countByStatus(projectId, "CLOSED"));
+        counts.put("NEW", countByStatus(projectId, "NEW"));
+        counts.put("ASSIGNED", countByStatus(projectId, "ASSIGNED"));
+        counts.put("FIXED", countByStatus(projectId, "FIXED"));
+        counts.put("RESOLVED", countByStatus(projectId, "RESOLVED"));
+        counts.put("CLOSED", countByStatus(projectId, "CLOSED"));
         return counts;
     }
 
+    private int countByStatus(Integer projectId, String status) {
+        var output = services.statistics().countByStatus(new CountByStatusInput(projectId, IssueStatus.valueOf(status)));
+        return output.success() ? (int) output.count() : 0;
+    }
+
     private Map<String, Long> dailyCounts() {
-        return new LinkedHashMap<>(backend.dailyIssueCounts(session.selectedProjectId()));
+        var output = services.statistics().getDailyIssueCounts(new GetDailyIssueCountsInput(session.selectedProjectId()));
+        Map<String, Long> counts = new LinkedHashMap<>();
+        if (!output.success()) {
+            return counts;
+        }
+        output.counts().forEach(item -> counts.put(item.date(), item.count()));
+        return counts;
     }
 
     private Map<String, Long> monthlyCounts(Map<String, Long> dailyCounts) {

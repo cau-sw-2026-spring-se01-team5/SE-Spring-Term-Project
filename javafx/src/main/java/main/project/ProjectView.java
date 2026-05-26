@@ -1,8 +1,8 @@
 package main.project;
 
-import backend.JavaFxBackend.ProjectItem;
-import backend.JavaFxBackend.UserItem;
 import enums.user.v1.UserRole;
+import model.JavaFxData.ProjectItem;
+import model.JavaFxData.UserItem;
 
 import java.util.List;
 import java.util.Optional;

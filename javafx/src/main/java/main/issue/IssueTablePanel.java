@@ -1,12 +1,12 @@
 package main.issue;
 
-import backend.JavaFxBackend.IssueItem;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import model.JavaFxData.IssueItem;
 
 import java.util.List;
 
@@ -38,6 +38,10 @@ class IssueTablePanel extends VBox {
 
     void setIssues(List<IssueItem> issues) {
         tableView.getItems().setAll(issues);
+    }
+
+    List<IssueItem> visibleIssues() {
+        return List.copyOf(tableView.getItems());
     }
 
     IssueItem selectedIssue() {

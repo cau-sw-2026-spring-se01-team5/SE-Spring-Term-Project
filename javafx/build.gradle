@@ -11,6 +11,10 @@ repositories {
     mavenCentral()
 }
 
+java {
+    modularity.inferModulePath = false
+}
+
 dependencies {
     implementation project(':controller')
     implementation project(':core')
@@ -24,10 +28,10 @@ javafx {
     modules = ['javafx.controls', 'javafx.fxml']
 }
 
-application {
-    mainClass = 'Main'
-}
-
 test {
     useJUnitPlatform()
+}
+
+application {
+    mainClass = 'Main'
 }

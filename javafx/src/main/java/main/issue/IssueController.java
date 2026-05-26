@@ -1,24 +1,39 @@
 package main.issue;
 
-import backend.JavaFxBackend;
-import backend.JavaFxBackend.IssueItem;
-import backend.JavaFxBackend.ProjectItem;
-import backend.JavaFxBackend.UserItem;
+import app.JavaFxMapper;
+import app.JavaFxServices;
+import enums.issue.v1.IssuePriority;
+import enums.issue.v1.IssueStatus;
 import enums.user.v1.UserRole;
+import issue.dto.addIssueComment.v1.AddIssueCommentInput;
+import issue.dto.assignIssue.v1.AssignIssueInput;
+import issue.dto.changeIssueStatus.v1.ChangeIssueStatusInput;
+import issue.dto.getIssueDetail.v1.GetIssueDetailInput;
+import issue.dto.getIssueList.v1.GetIssueListInput;
+import issue.dto.recommendAssignee.v1.RecommendAssigneeInput;
+import issue.dto.registerIssue.v1.RegisterIssueInput;
+import model.JavaFxData.IssueItem;
+import model.JavaFxData.ProjectItem;
+import model.JavaFxData.RegisterIssueResult;
+import model.JavaFxData.UserItem;
+import project.dto.getProjectList.v1.GetProjectListInput;
 import session.UserSession;
+import user.dto.getProjectUserList.v1.GetProjectUserListInput;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class IssueController {
 
     private final IssueView view;
-    private final JavaFxBackend backend;
+    private final JavaFxServices services;
     private final UserSession session;
 
-    public IssueController(IssueView view, JavaFxBackend backend, UserSession session) {
+    public IssueController(IssueView view, JavaFxServices services, UserSession session) {
         this.view = view;
-        this.backend = backend;
+        this.services = services;
         this.session = session;
         bind();
     }
@@ -52,33 +67,28 @@ public class IssueController {
     private void registerIssue() {
         List<ProjectItem> availableProjects = currentProjectItems();
         if (availableProjects.isEmpty()) {
-            view.showWarning("선택된 프로젝트가 없습니다.");
+            view.showWarning("선택 가능한 프로젝트가 없습니다.");
             return;
         }
 
         view.showRegisterIssueDialog(availableProjects).ifPresent(form -> {
-            String errorMessage = backend.registerIssue(
+            var output = services.issue().registerIssue(new RegisterIssueInput(
                     form.project().id(),
                     form.title(),
                     form.description(),
-                    session.loginId(),
-                    form.priority()
-            );
-            if (errorMessage != null) {
-                view.showWarning(errorMessage);
+                    IssuePriority.valueOf(form.priority()),
+                    session.userId()
+            ));
+            RegisterIssueResult result = JavaFxMapper.registerIssueResult(output.success(), output.issueId(), output.message());
+            if (!result.success()) {
+                view.showWarning(result.message());
                 return;
             }
-            IssueItem createdIssue = currentProjectIssues().stream()
-                    .filter(issue -> issue.projectId() == form.project().id())
-                    .filter(issue -> issue.title().equals(form.title()))
-                    .filter(issue -> issue.description().equals(form.description()))
-                    .filter(issue -> issue.reporter().equals(session.loginId()))
-                    .reduce((first, second) -> second)
-                    .orElse(null);
 
-            if (createdIssue != null) {
-                backend.addComment(createdIssue.id(), session.loginId(), form.comment());
+            if (result.issueId() != null && form.comment() != null && !form.comment().isBlank()) {
+                services.issue().addIssueComment(new AddIssueCommentInput(result.issueId(), session.userId(), form.comment()));
             }
+
             refreshTable();
         });
     }
@@ -92,10 +102,26 @@ public class IssueController {
             view.showWarning("PL은 NEW 또는 REOPENED 상태의 이슈만 배정할 수 있습니다.");
             return;
         }
-        view.showAssignIssueDialog(backend.developerLoginIdsForProject(selected.projectId()), session.loginId()).ifPresent(form -> {
-            backend.assignIssue(selected.id(), form.assignee(), session.loginId(), form.comment());
-            refreshTable();
-        });
+
+        view.showAssignIssueDialog(projectDeveloperLoginIds(selected.projectId()), session.loginId())
+                .ifPresent(form -> {
+                    Integer assigneeUserId = userIdByLoginId(selected.projectId(), form.assignee());
+                    if (assigneeUserId == null) {
+                        view.showWarning("선택한 개발자 계정을 찾을 수 없습니다.");
+                        return;
+                    }
+                    var output = services.issue().assignIssue(new AssignIssueInput(
+                            selected.id(),
+                            session.userId(),
+                            assigneeUserId,
+                            form.comment()
+                    ));
+                    if (!output.success()) {
+                        view.showWarning(output.message());
+                        return;
+                    }
+                    refreshTable();
+                });
     }
 
     private void markFixed() {
@@ -107,10 +133,23 @@ public class IssueController {
             view.showWarning("자신에게 배정된 이슈만 수정 완료 처리할 수 있습니다.");
             return;
         }
-        view.showCommentDialog("수정 완료 처리", "수정을 완료했고 테스트 검증을 요청합니다.").ifPresent(comment -> {
-            backend.markFixed(selected.id(), session.loginId(), comment);
-            refreshTable();
-        });
+
+        view.showCommentDialog("수정 완료 처리", "수정이 완료되어 테스트 검증을 요청합니다.")
+                .ifPresent(comment -> {
+                    var output = services.issue().changeIssueStatus(new ChangeIssueStatusInput(
+                            selected.id(),
+                            session.userId(),
+                            IssueStatus.FIXED
+                    ));
+                    if (!output.success()) {
+                        view.showWarning(output.message());
+                        return;
+                    }
+                    if (!comment.isBlank()) {
+                        services.issue().addIssueComment(new AddIssueCommentInput(selected.id(), session.userId(), comment));
+                    }
+                    refreshTable();
+                });
     }
 
     private void resolveIssue() {
@@ -122,7 +161,16 @@ public class IssueController {
             view.showWarning("FIXED 상태의 이슈만 해결 확인할 수 있습니다.");
             return;
         }
-        backend.resolveIssue(selected.id(), session.loginId(), "테스터가 수정 내용을 확인함");
+
+        var output = services.issue().changeIssueStatus(new ChangeIssueStatusInput(
+                selected.id(),
+                session.userId(),
+                IssueStatus.RESOLVED
+        ));
+        if (!output.success()) {
+            view.showWarning(output.message());
+            return;
+        }
         refreshTable();
     }
 
@@ -140,9 +188,13 @@ public class IssueController {
             return;
         }
 
-        String errorMessage = backend.reopenIssue(selected.id(), session.loginId(), "관리자가 종료된 이슈를 재오픈함");
-        if (errorMessage != null) {
-            view.showWarning(errorMessage);
+        var output = services.issue().changeIssueStatus(new ChangeIssueStatusInput(
+                selected.id(),
+                session.userId(),
+                IssueStatus.REOPENED
+        ));
+        if (!output.success()) {
+            view.showWarning(output.message());
             return;
         }
         refreshTable();
@@ -157,7 +209,16 @@ public class IssueController {
             view.showWarning("RESOLVED 상태의 이슈만 종료할 수 있습니다.");
             return;
         }
-        backend.closeIssue(selected.id(), session.loginId(), "PL이 해결된 이슈를 종료 처리함");
+
+        var output = services.issue().changeIssueStatus(new ChangeIssueStatusInput(
+                selected.id(),
+                session.userId(),
+                IssueStatus.CLOSED
+        ));
+        if (!output.success()) {
+            view.showWarning(output.message());
+            return;
+        }
         refreshTable();
     }
 
@@ -166,17 +227,31 @@ public class IssueController {
         if (selected == null) {
             return;
         }
+
         view.showCommentDialog("코멘트 추가", "").ifPresent(comment -> {
-            backend.addComment(selected.id(), session.loginId(), comment);
+            var output = services.issue().addIssueComment(new AddIssueCommentInput(selected.id(), session.userId(), comment));
+            if (!output.success()) {
+                view.showWarning(output.message());
+                return;
+            }
             refreshTable();
         });
     }
 
     private void showSelectedIssue() {
         IssueItem selected = requireSelectedIssue();
-        if (selected != null) {
-            view.showIssueDetail(selected);
+        if (selected == null) {
+            return;
         }
+
+        var output = services.issue().getIssueDetail(new GetIssueDetailInput(selected.id()));
+        if (!output.success()) {
+            view.showWarning(output.message());
+            return;
+        }
+
+        String assigneeLoginId = output.assigneeUserId() == null ? "" : services.roleResolver().resolveLoginId(output.assigneeUserId());
+        view.showIssueDetail(JavaFxMapper.issueItem(output, assigneeLoginId));
     }
 
     private void recommendAssignee() {
@@ -184,25 +259,47 @@ public class IssueController {
         if (selected == null) {
             return;
         }
-
         if (!"NEW".equals(selected.status()) && !"REOPENED".equals(selected.status())) {
             view.showWarning("담당자 추천은 NEW 또는 REOPENED 상태의 이슈에서만 사용할 수 있습니다.");
             return;
         }
 
-        List<String> recommendations = backend.recommendAssignees(selected);
+        var output = services.issue().recommendAssignees(new RecommendAssigneeInput(selected.id(), selected.projectId()));
+        if (!output.success()) {
+            view.showWarning(output.message());
+            return;
+        }
+
+        List<String> recommendations = output.candidates().stream()
+                .map(candidate -> candidate.userId())
+                .toList();
+
         view.showRecommendationSelectDialog(recommendations).ifPresent(candidate -> {
-            List<String> developers = backend.developerLoginIdsForProject(selected.projectId());
+            List<String> developers = projectDeveloperLoginIds(selected.projectId());
             view.showAssignIssueDialog(developers, session.loginId(), candidate).ifPresent(form -> {
-                backend.assignIssue(selected.id(), form.assignee(), session.loginId(), form.comment());
+                Integer assigneeUserId = userIdByLoginId(selected.projectId(), form.assignee());
+                if (assigneeUserId == null) {
+                    view.showWarning("선택한 개발자 계정을 찾을 수 없습니다.");
+                    return;
+                }
+                var assignOutput = services.issue().assignIssue(new AssignIssueInput(
+                        selected.id(),
+                        session.userId(),
+                        assigneeUserId,
+                        form.comment()
+                ));
+                if (!assignOutput.success()) {
+                    view.showWarning(assignOutput.message());
+                    return;
+                }
                 refreshTable();
             });
         });
     }
 
     private void showStatistics() {
-        Integer projectId = session.selectedProjectId();
-        String daily = backend.dailyIssueCounts(projectId).entrySet().stream()
+        List<IssueItem> visibleIssues = view.visibleIssues();
+        String daily = dailyCounts(visibleIssues).entrySet().stream()
                 .map(entry -> entry.getKey() + ": " + entry.getValue())
                 .collect(Collectors.joining("\n"));
 
@@ -212,11 +309,12 @@ public class IssueController {
 
         view.showStatistics(
                 "상태별 요약\n" +
-                        "NEW: " + backend.countByStatus(projectId, "NEW") + "\n" +
-                        "ASSIGNED: " + backend.countByStatus(projectId, "ASSIGNED") + "\n" +
-                        "FIXED: " + backend.countByStatus(projectId, "FIXED") + "\n" +
-                        "RESOLVED: " + backend.countByStatus(projectId, "RESOLVED") + "\n" +
-                        "CLOSED: " + backend.countByStatus(projectId, "CLOSED") + "\n\n" +
+                        "NEW: " + countByStatus(visibleIssues, "NEW") + "\n" +
+                        "ASSIGNED: " + countByStatus(visibleIssues, "ASSIGNED") + "\n" +
+                        "FIXED: " + countByStatus(visibleIssues, "FIXED") + "\n" +
+                        "RESOLVED: " + countByStatus(visibleIssues, "RESOLVED") + "\n" +
+                        "CLOSED: " + countByStatus(visibleIssues, "CLOSED") + "\n" +
+                        "REOPENED: " + countByStatus(visibleIssues, "REOPENED") + "\n\n" +
                         "일별 발생 건수\n" + daily
         );
     }
@@ -231,30 +329,58 @@ public class IssueController {
 
     private List<IssueItem> currentProjectIssues() {
         Integer selectedProjectId = session.selectedProjectId();
-        return backend.issuesForRole(session.loginId(), session.role()).stream()
-                .filter(issue -> selectedProjectId == null || issue.projectId() == selectedProjectId)
+        if (selectedProjectId == null) {
+            return List.of();
+        }
+
+        var output = services.issue().getIssueList(new GetIssueListInput(
+                selectedProjectId,
+                session.userId(),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        ));
+        if (!output.success() || output.issues() == null) {
+            return List.of();
+        }
+
+        return output.issues().stream()
+                .map(JavaFxMapper::issueItem)
                 .toList();
     }
 
     private List<ProjectItem> currentProjectItems() {
-        List<ProjectItem> projects = backend.projectsForUser(session.loginId(), session.role());
+        var output = services.project().getProjectList(new GetProjectListInput(session.userId()));
+        if (!output.success() || output.projectList() == null) {
+            return List.of();
+        }
+
+        List<ProjectItem> projects = output.projectList().stream()
+                .map(JavaFxMapper::projectItem)
+                .toList();
         Integer selectedProjectId = session.selectedProjectId();
         if (selectedProjectId == null) {
             return projects;
         }
 
         return projects.stream()
-                .filter(project -> project.id() == selectedProjectId)
+                .filter(project -> project.id().equals(selectedProjectId))
                 .toList();
     }
 
     private List<String> projectDeveloperLoginIds() {
         Integer selectedProjectId = session.selectedProjectId();
         if (selectedProjectId == null) {
-            return backend.developerLoginIds();
+            return List.of();
         }
+        return projectDeveloperLoginIds(selectedProjectId);
+    }
 
-        return backend.usersForProject(selectedProjectId).stream()
+    private List<String> projectDeveloperLoginIds(Integer projectId) {
+        return usersForProject(projectId).stream()
                 .filter(user -> user.role() == UserRole.DEV)
                 .map(UserItem::loginId)
                 .toList();
@@ -263,12 +389,45 @@ public class IssueController {
     private List<String> projectTesterLoginIds() {
         Integer selectedProjectId = session.selectedProjectId();
         if (selectedProjectId == null) {
-            return backend.testerLoginIds();
+            return List.of();
         }
 
-        return backend.usersForProject(selectedProjectId).stream()
+        return usersForProject(selectedProjectId).stream()
                 .filter(user -> user.role() == UserRole.TESTER)
                 .map(UserItem::loginId)
                 .toList();
+    }
+
+    private List<UserItem> usersForProject(Integer projectId) {
+        var output = services.user().getProjectUserList(new GetProjectUserListInput(projectId));
+        if (!output.success() || output.userList() == null) {
+            return List.of();
+        }
+        return output.userList().stream().map(JavaFxMapper::userItem).toList();
+    }
+
+    private Integer userIdByLoginId(Integer projectId, String loginId) {
+        return usersForProject(projectId).stream()
+                .filter(user -> user.loginId().equals(loginId))
+                .map(UserItem::id)
+                .findFirst()
+                .orElse(null);
+    }
+
+    private long countByStatus(List<IssueItem> issues, String status) {
+        return issues.stream()
+                .filter(issue -> status.equals(issue.status()))
+                .count();
+    }
+
+    private Map<String, Long> dailyCounts(List<IssueItem> issues) {
+        return issues.stream()
+                .collect(Collectors.groupingBy(
+                        issue -> issue.reportedDate() == null || issue.reportedDate().length() < 10
+                                ? "unknown"
+                                : issue.reportedDate().substring(0, 10),
+                        LinkedHashMap::new,
+                        Collectors.counting()
+                ));
     }
 }

@@ -1,7 +1,5 @@
 package main.project;
 
-import backend.JavaFxBackend.ProjectItem;
-import backend.JavaFxBackend.UserItem;
 import enums.user.v1.UserRole;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -16,6 +14,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import model.JavaFxData.ProjectItem;
+import model.JavaFxData.UserItem;
 import ui.UiDialog;
 
 import java.util.List;

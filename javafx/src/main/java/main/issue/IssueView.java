@@ -1,8 +1,7 @@
 package main.issue;
 
-import backend.JavaFxBackend.IssueItem;
-import backend.JavaFxBackend.ProjectItem;
-
+import model.JavaFxData.IssueItem;
+import model.JavaFxData.ProjectItem;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,6 +22,8 @@ public interface IssueView {
     void setFilterOptions(List<String> assignees, List<String> reporters);
 
     void setIssues(List<IssueItem> issues);
+
+    List<IssueItem> visibleIssues();
 
     boolean matchesFilter(IssueItem issue);
 
