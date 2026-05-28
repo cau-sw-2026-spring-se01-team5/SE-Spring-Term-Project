@@ -8,6 +8,7 @@ import enums.user.v1.UserRole;
 import issue.dto.addIssueComment.v1.AddIssueCommentInput;
 import issue.dto.assignIssue.v1.AssignIssueInput;
 import issue.dto.changeIssueStatus.v1.ChangeIssueStatusInput;
+import issue.dto.deleteIssue.v1.DeleteIssueInput;
 import issue.dto.getIssueDetail.v1.GetIssueDetailInput;
 import issue.dto.getIssueList.v1.GetIssueListInput;
 import issue.dto.recommendAssignee.v1.RecommendAssigneeInput;
@@ -51,6 +52,7 @@ public class IssueController {
         view.onAddComment(this::addComment);
         view.onAssignIssue(this::assignIssue);
         view.onRecommendAssignee(this::recommendAssignee);
+        view.onDeleteIssue(this::deleteIssue);
         view.onCloseIssue(this::closeIssue);
         view.onShowStatistics(this::showStatistics);
         view.onMarkFixed(this::markFixed);
@@ -215,6 +217,23 @@ public class IssueController {
                 selected.id(),
                 session.userId(),
                 IssueStatus.CLOSED
+        ));
+        if (!output.success()) {
+            view.showWarning(output.message());
+            return;
+        }
+        refreshTable();
+    }
+
+    private void deleteIssue() {
+        IssueItem selected = requireSelectedIssue();
+        if (selected == null) {
+            return;
+        }
+
+        var output = services.issue().deleteIssue(new DeleteIssueInput(
+                session.userId(),
+                selected.id()
         ));
         if (!output.success()) {
             view.showWarning(output.message());
