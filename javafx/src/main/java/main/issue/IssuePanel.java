@@ -36,6 +36,7 @@ public class IssuePanel extends VBox implements IssueView {
     private Button commentButton;
     private Button assignButton;
     private Button recommendButton;
+    private Button deleteButton;
     private Button closeButton;
     private Button statisticsButton;
     private Button fixedButton;
@@ -118,7 +119,7 @@ public class IssuePanel extends VBox implements IssueView {
 
         TextArea commentArea = new TextArea();
         commentArea.setPrefRowCount(3);
-        commentArea.setPromptText("등록 코멘트를 입력하세요.");
+        commentArea.setPromptText("등록 코멘트를 입력하세요");
 
         ComboBox<String> priorityBox = new ComboBox<>();
         priorityBox.getItems().addAll("BLOCKER", "CRITICAL", "MAJOR", "MINOR", "TRIVIAL");
@@ -136,7 +137,7 @@ public class IssuePanel extends VBox implements IssueView {
                 return null;
             }
             if (titleField.getText().isBlank() || descriptionArea.getText().isBlank()) {
-                UiDialog.showWarning("제목, 설명, 코멘트는 모두 입력해야 합니다.");
+                UiDialog.showWarning("제목과 설명은 반드시 입력해야 합니다.");
                 return null;
             }
             return new CreateIssueForm(
@@ -175,7 +176,8 @@ public class IssuePanel extends VBox implements IssueView {
 
         TextArea commentArea = new TextArea(writer + "가 이슈를 " + developerBox.getValue() + "에게 배정합니다.");
         commentArea.setPrefRowCount(3);
-        developerBox.setOnAction(event -> commentArea.setText(writer + "가 이슈를 " + developerBox.getValue() + "에게 배정합니다."));
+        developerBox.setOnAction(event ->
+                commentArea.setText(writer + "가 이슈를 " + developerBox.getValue() + "에게 배정합니다."));
 
         addRow(form, 0, "개발자", developerBox);
         addRow(form, 1, "코멘트", commentArea);
@@ -193,7 +195,7 @@ public class IssuePanel extends VBox implements IssueView {
     public Optional<String> showCommentDialog(String title, String defaultComment) {
         Dialog<String> dialog = baseDialog(title);
         TextArea commentArea = new TextArea(defaultComment);
-        commentArea.setPromptText("코멘트를 입력하세요.");
+        commentArea.setPromptText("코멘트를 입력하세요");
         commentArea.setPrefRowCount(4);
         dialog.getDialogPane().setContent(commentArea);
         dialog.setResultConverter(button -> {
@@ -231,7 +233,7 @@ public class IssuePanel extends VBox implements IssueView {
         if (candidates == null || candidates.isEmpty()) {
             UiDialog.showInfo(
                     "담당자 자동 추천",
-                    "추천 후보가 없습니다.\n\n과거에 해결된 이슈의 fixer 기록이 있어야 추천 결과가 표시됩니다."
+                    "추천 후보가 없습니다.\n\n과거에 해결한 이슈의 fixer 기록이 있어야 추천 결과가 표시됩니다."
             );
             return;
         }
@@ -251,7 +253,7 @@ public class IssuePanel extends VBox implements IssueView {
         if (candidates == null || candidates.isEmpty()) {
             UiDialog.showInfo(
                     "담당자 자동 추천",
-                    "추천 후보가 없습니다.\n\n과거에 해결된 이슈의 fixer 기록이 있어야 추천 결과가 표시됩니다."
+                    "추천 후보가 없습니다.\n\n과거에 해결한 이슈의 fixer 기록이 있어야 추천 결과가 표시됩니다."
             );
             return Optional.empty();
         }
@@ -321,6 +323,13 @@ public class IssuePanel extends VBox implements IssueView {
     }
 
     @Override
+    public void onDeleteIssue(Runnable handler) {
+        if (deleteButton != null) {
+            deleteButton.setOnAction(event -> handler.run());
+        }
+    }
+
+    @Override
     public void onCloseIssue(Runnable handler) {
         if (closeButton != null) {
             closeButton.setOnAction(event -> handler.run());
@@ -360,17 +369,19 @@ public class IssuePanel extends VBox implements IssueView {
             case ADMIN -> {
                 detailButton = actionButton("상세");
                 commentButton = actionButton("코멘트");
+                deleteButton = actionButton("삭제");
                 reopenButton = actionButton("재오픈");
                 statisticsButton = actionButton("통계");
-                yield new Button[]{detailButton, commentButton, reopenButton, statisticsButton};
+                yield new Button[]{detailButton, commentButton, deleteButton, reopenButton, statisticsButton};
             }
             case PL -> {
                 detailButton = actionButton("상세");
                 assignButton = actionButton("배정");
                 recommendButton = actionButton("추천");
+                deleteButton = actionButton("삭제");
                 closeButton = actionButton("종료");
                 statisticsButton = actionButton("통계");
-                yield new Button[]{detailButton, assignButton, recommendButton, closeButton, statisticsButton};
+                yield new Button[]{detailButton, assignButton, recommendButton, deleteButton, closeButton, statisticsButton};
             }
             case DEV -> {
                 detailButton = actionButton("상세");

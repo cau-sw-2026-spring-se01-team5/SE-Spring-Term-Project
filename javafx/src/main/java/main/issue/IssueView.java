@@ -59,6 +59,8 @@ public interface IssueView {
 
     void onRecommendAssignee(Runnable handler);
 
+    void onDeleteIssue(Runnable handler);
+
     void onCloseIssue(Runnable handler);
 
     void onShowStatistics(Runnable handler);
