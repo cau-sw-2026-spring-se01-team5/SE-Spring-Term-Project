@@ -51,7 +51,12 @@ public class ProjectImpl implements Project {
             List<domain.Project> projects = projectRepository.list();
             List<ProjectInfoOutput> projectInfoOutputs = new ArrayList<>();
             for (domain.Project project : projects) {
-                projectInfoOutputs.add(new ProjectInfoOutput(project.getId(), project.getName()));
+                boolean isMember = userRepository.byProjectId(project.getId())
+                        .stream()
+                        .anyMatch(user -> user.getId().equals(input.requesterUserId()));
+                if (isMember) {
+                    projectInfoOutputs.add(new ProjectInfoOutput(project.getId(), project.getName()));
+                }
             }
             return new GetProjectListOutput(true, "프로젝트 목록 조회 성공", projectInfoOutputs);
         } catch (Exception e) {

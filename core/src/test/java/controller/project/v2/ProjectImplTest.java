@@ -42,6 +42,7 @@ class ProjectImplTest {
 
         when(userRepository.load(admin.getId())).thenReturn(admin);
         when(userRepository.load(nonAdmin.getId())).thenReturn(nonAdmin);
+        when(userRepository.byProjectId(newProject.getId())).thenReturn(List.of(admin));
         when(projectRepository.save(any())).thenReturn(newProject.getId());
         when(projectRepository.list()).thenReturn(List.of(newProject));
         when(projectRepository.load(newProject.getId())).thenReturn(newProject);

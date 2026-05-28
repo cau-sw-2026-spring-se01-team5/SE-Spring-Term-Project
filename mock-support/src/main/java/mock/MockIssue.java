@@ -172,8 +172,8 @@ public class MockIssue implements Issue {
                 return new ChangeIssueStatusOutput(false, input.issueId(), issue.status(), "REOPENED는 Admin만 처리할 수 있습니다.");
             }
 
-            if (issue.status() != IssueStatus.RESOLVED) {
-                return new ChangeIssueStatusOutput(false, input.issueId(), issue.status(), "RESOLVED 상태에서만 REOPENED로 변경할 수 있습니다.");
+            if (issue.status() != IssueStatus.CLOSED) {
+                return new ChangeIssueStatusOutput(false, input.issueId(), issue.status(), "CLOSED 상태에서만 REOPENED로 변경할 수 있습니다.");
             }
         }
 

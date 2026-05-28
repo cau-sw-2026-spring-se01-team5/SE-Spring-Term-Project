@@ -7,6 +7,7 @@ import model.JavaFxData.LoginUser;
 
 import java.util.function.Consumer;
 
+// 로그인 입력을 받아 인증 결과를 화면 흐름으로 연결한다.
 public class LoginController {
 
     private final LoginView view;

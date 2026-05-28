@@ -8,6 +8,7 @@ import main.project.ProjectController;
 import main.project.ProjectPanel;
 import session.UserSession;
 
+// 로그인 이후 화면 흐름을 조립하는 최상위 컨트롤러.
 public class AppController {
 
     private final AppFrame frame;

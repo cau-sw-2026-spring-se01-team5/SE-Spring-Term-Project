@@ -9,6 +9,7 @@ import model.JavaFxData.IssueItem;
 
 import java.util.List;
 
+// 이슈 검색 조건 입력과 조건 비교를 담당한다.
 class IssueFilterPanel extends HBox {
 
     private static final String ALL_STATUS = "전체상태";

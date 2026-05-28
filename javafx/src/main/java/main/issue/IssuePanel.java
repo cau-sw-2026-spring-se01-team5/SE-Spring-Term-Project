@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+// 이슈 목록/상세/액션을 묶어 IssueView를 구현하는 상위 패널.
 public class IssuePanel extends VBox implements IssueView {
 
     private final UserRole role;

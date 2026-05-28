@@ -10,6 +10,7 @@ import model.JavaFxData.IssueItem;
 
 import java.util.List;
 
+// 현재 화면에 보이는 이슈 목록과 선택 상태를 관리한다.
 class IssueTablePanel extends VBox {
 
     private final TableView<IssueItem> tableView = new TableView<>();

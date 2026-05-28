@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+// 이슈 조회, 등록, 상태 변경, 통계 표시를 조율한다.
 public class IssueController {
 
     private final IssueView view;

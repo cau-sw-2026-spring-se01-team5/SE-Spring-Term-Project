@@ -9,6 +9,7 @@ import main.project.ProjectController;
 import main.project.ProjectPanel;
 import session.UserSession;
 
+// 메인 화면 안에서 섹션 전환을 제어한다.
 public class MainController {
 
     private final MainPanel mainPanel;

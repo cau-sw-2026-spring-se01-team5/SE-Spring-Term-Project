@@ -16,6 +16,7 @@ import user.dto.getProjectUserList.v1.GetProjectUserListInput;
 import java.util.ArrayList;
 import java.util.List;
 
+// 프로젝트 선택, 프로젝트/사용자 관리 흐름을 제어한다.
 public class ProjectController {
 
     private final ProjectView view;
