@@ -13,6 +13,7 @@ import model.JavaFxData.LoginUser;
 
 import java.util.function.Consumer;
 
+// 로그인 화면 UI와 입력 이벤트만 담당한다.
 public class LoginPanel extends BorderPane implements LoginView {
 
     private final TextField idField = new TextField();

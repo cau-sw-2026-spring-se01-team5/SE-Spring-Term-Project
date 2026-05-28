@@ -4,6 +4,7 @@ import model.JavaFxData.LoginUser;
 
 import java.util.function.Consumer;
 
+// 로그인 화면이 컨트롤러에 제공해야 할 최소 인터페이스.
 public interface LoginView {
 
     String getLoginId();

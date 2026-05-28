@@ -21,6 +21,7 @@ import ui.UiDialog;
 import java.util.List;
 import java.util.Optional;
 
+// 프로젝트 목록과 프로젝트 사용자 화면을 함께 구성한다.
 public class ProjectPanel extends VBox implements ProjectView {
 
     private final UserRole role;

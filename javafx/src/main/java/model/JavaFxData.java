@@ -4,6 +4,7 @@ import enums.user.v1.UserRole;
 
 import java.util.List;
 
+// JavaFX 화면이 직접 사용하는 표시용 데이터 모델 모음.
 public final class JavaFxData {
 
     private JavaFxData() {

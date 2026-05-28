@@ -20,6 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+// 선택된 프로젝트의 통계 요약을 보여주는 패널.
 public class DashboardPanel extends VBox {
 
     private final JavaFxServices services;
