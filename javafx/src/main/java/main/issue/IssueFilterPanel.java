@@ -80,15 +80,12 @@ class IssueFilterPanel extends HBox {
         searchButton.setOnAction(event -> handler.run());
     }
 
-    boolean matches(IssueItem issue) {
-        String keyword = keywordField.getText() == null ? "" : keywordField.getText().trim().toLowerCase();
-
-        return (ALL_STATUS.equals(statusBox.getValue()) || issue.status().equals(statusBox.getValue()))
-                && (ALL_PRIORITY.equals(priorityBox.getValue()) || issue.priority().equals(priorityBox.getValue()))
-                && (ALL_ASSIGNEE.equals(assigneeBox.getValue()) || issue.assignee().equals(assigneeBox.getValue()))
-                && (ALL_REPORTER.equals(reporterBox.getValue()) || issue.reporter().equals(reporterBox.getValue()))
-                && (keyword.isEmpty()
-                || issue.title().toLowerCase().contains(keyword)
-                || issue.description().toLowerCase().contains(keyword));
+    IssueView.SearchCondition searchCondition() {
+        String keyword = keywordField.getText() == null ? "" : keywordField.getText().trim();
+        String status = ALL_STATUS.equals(statusBox.getValue()) ? null : statusBox.getValue();
+        String priority = ALL_PRIORITY.equals(priorityBox.getValue()) ? null : priorityBox.getValue();
+        String assigneeLoginId = ALL_ASSIGNEE.equals(assigneeBox.getValue()) ? null : assigneeBox.getValue();
+        String reporterLoginId = ALL_REPORTER.equals(reporterBox.getValue()) ? null : reporterBox.getValue();
+        return new IssueView.SearchCondition(keyword, status, priority, assigneeLoginId, reporterLoginId);
     }
 }

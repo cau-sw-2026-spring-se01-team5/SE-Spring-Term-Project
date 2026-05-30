@@ -85,13 +85,13 @@ public class IssuePanel extends VBox implements IssueView {
     }
 
     @Override
-    public List<IssueItem> visibleIssues() {
-        return tablePanel.visibleIssues();
+    public SearchCondition searchCondition() {
+        return filterPanel.searchCondition();
     }
 
     @Override
-    public boolean matchesFilter(IssueItem issue) {
-        return filterPanel.matches(issue);
+    public List<IssueItem> visibleIssues() {
+        return tablePanel.visibleIssues();
     }
 
     @Override

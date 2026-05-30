@@ -13,6 +13,15 @@ import java.util.Optional;
  */
 public interface IssueView {
 
+    record SearchCondition(
+            String keyword,
+            String status,
+            String priority,
+            String assigneeLoginId,
+            String reporterLoginId
+    ) {
+    }
+
     record CreateIssueForm(ProjectItem project, String title, String description, String priority, String comment) {
     }
 
@@ -23,9 +32,9 @@ public interface IssueView {
 
     void setIssues(List<IssueItem> issues);
 
-    List<IssueItem> visibleIssues();
+    SearchCondition searchCondition();
 
-    boolean matchesFilter(IssueItem issue);
+    List<IssueItem> visibleIssues();
 
     IssueItem selectedIssue();
 

@@ -61,10 +61,38 @@ public class IssueController {
     }
 
     private void refreshTable() {
-        List<IssueItem> filtered = currentProjectIssues().stream()
-                .filter(view::matchesFilter)
+        Integer selectedProjectId = session.selectedProjectId();
+        if (selectedProjectId == null) {
+            view.setIssues(List.of());
+            return;
+        }
+
+        IssueView.SearchCondition condition = view.searchCondition();
+        Integer assigneeUserId = userIdByLoginId(selectedProjectId, condition.assigneeLoginId());
+        Integer reporterUserId = userIdByLoginId(selectedProjectId, condition.reporterLoginId());
+
+        var output = services.issue().getIssueList(new GetIssueListInput(
+                selectedProjectId,
+                session.userId(),
+                assigneeUserId,
+                reporterUserId,
+                null,
+                toIssueStatus(condition.status()),
+                toIssuePriority(condition.priority()),
+                normalizeKeyword(condition.keyword())
+        ));
+        if (!output.success() || output.issues() == null) {
+            view.setIssues(List.of());
+            if (!output.success()) {
+                view.showWarning(output.message());
+            }
+            return;
+        }
+
+        List<IssueItem> issues = output.issues().stream()
+                .map(JavaFxMapper::issueItem)
                 .toList();
-        view.setIssues(filtered);
+        view.setIssues(issues);
     }
 
     private void registerIssue() {
@@ -370,6 +398,22 @@ public class IssueController {
         return output.issues().stream()
                 .map(JavaFxMapper::issueItem)
                 .toList();
+    }
+
+    private String normalizeKeyword(String keyword) {
+        if (keyword == null) {
+            return null;
+        }
+        String trimmed = keyword.trim();
+        return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private IssueStatus toIssueStatus(String status) {
+        return status == null ? null : IssueStatus.valueOf(status);
+    }
+
+    private IssuePriority toIssuePriority(String priority) {
+        return priority == null ? null : IssuePriority.valueOf(priority);
     }
 
     private List<ProjectItem> currentProjectItems() {
