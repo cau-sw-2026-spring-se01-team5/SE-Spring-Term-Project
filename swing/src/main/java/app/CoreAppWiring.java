@@ -32,7 +32,11 @@ public class CoreAppWiring implements AppWiring {
 
     @Override
     public AppServices wire() throws Exception {
-        Connection connection = DriverManager.getConnection("jdbc:sqlite:test.db");
+        String dbPath = System.getProperty("swing.db.path");
+        Path resolvedDbPath = dbPath == null || dbPath.isBlank()
+                ? resolveProjectRoot().resolve("test.db")
+                : Path.of(dbPath);
+        Connection connection = DriverManager.getConnection("jdbc:sqlite:" + resolvedDbPath.toAbsolutePath());
         initSchema(connection);
         makeDefaultAdmin(connection);
 
@@ -57,7 +61,7 @@ public class CoreAppWiring implements AppWiring {
     }
 
     private static void initSchema(Connection connection) throws Exception {
-        String schema = Files.readString(Path.of("core/src/main/java/repository/sqlite/schema.sql"));
+        String schema = Files.readString(resolveSchemaPath());
 
         String[] statements = schema.split(";");
         for (String raw : statements) {
@@ -72,6 +76,31 @@ public class CoreAppWiring implements AppWiring {
     }
 
     // 처음 앱 실행시 초기 프로젝트와 admin 생성
+    private static Path resolveSchemaPath() {
+        Path direct = Path.of("core/src/main/java/repository/sqlite/schema.sql");
+        if (Files.exists(direct)) {
+            return direct;
+        }
+
+        Path parent = Path.of("../core/src/main/java/repository/sqlite/schema.sql");
+        if (Files.exists(parent)) {
+            return parent;
+        }
+
+        throw new IllegalStateException("schema.sql path was not found.");
+    }
+
+    private static Path resolveProjectRoot() {
+        Path current = Path.of("").toAbsolutePath();
+        while (current != null) {
+            if (Files.exists(current.resolve("settings.gradle"))) {
+                return current;
+            }
+            current = current.getParent();
+        }
+        return Path.of("").toAbsolutePath();
+    }
+
     private static void makeDefaultAdmin(Connection connection) throws Exception {
         try (PreparedStatement project = connection.prepareStatement(
                 "INSERT OR IGNORE INTO projects(id, name) VALUES (1, ?)")
