@@ -1,5 +1,5 @@
 subprojects {
-    buildDir = file("C:/tmp/issue-tracker-build/${project.name}")
+    buildDir = new File(System.getProperty('java.io.tmpdir'), "issue-tracker-build/${project.name}")
 
     tasks.withType(JavaCompile).configureEach {
         options.encoding = 'UTF-8'
