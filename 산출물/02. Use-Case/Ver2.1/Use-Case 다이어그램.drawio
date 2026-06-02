@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="its-use-cases" name="ITS Use Cases">
-        <mxGraphModel dx="1651" dy="1163" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1480" pageHeight="1040" math="0" shadow="0">
+        <mxGraphModel dx="1293" dy="1110" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1480" pageHeight="1040" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -37,13 +37,13 @@
                 <mxCell id="uc6" value="UC6&lt;br&gt;이슈 종료처리" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
                     <mxGeometry x="1230" y="387" width="200" height="66" as="geometry"/>
                 </mxCell>
-                <mxCell id="uc7" value="&lt;font color=&quot;#000000&quot;&gt;UC7&lt;br&gt;이슈 브라우즈 (include)&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                <mxCell id="uc7" value="&lt;font color=&quot;#000000&quot;&gt;UC7&lt;br&gt;이슈 브라우즈&lt;br&gt;(include? extend?)&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="1" vertex="1">
                     <mxGeometry x="900" y="484" width="260" height="72" as="geometry"/>
                 </mxCell>
-                <mxCell id="uc9" value="UC9&lt;br&gt;담당자 후보 추천 (extend)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" parent="1" vertex="1">
-                    <mxGeometry x="740" y="43" width="220" height="70" as="geometry"/>
+                <mxCell id="uc9" value="UC9&lt;br&gt;담당자 후보 추천 (extend)" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="970" y="50" width="220" height="70" as="geometry"/>
                 </mxCell>
-                <mxCell id="uc10" value="UC10&lt;br&gt;통계 분석 (extend)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" parent="1" vertex="1">
+                <mxCell id="uc10" value="UC10&lt;br&gt;통계 분석 (extend)" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
                     <mxGeometry x="920" y="640" width="220" height="70" as="geometry"/>
                 </mxCell>
                 <mxCell id="e_admin_uc1" style="html=1;rounded=0;strokeWidth=1;endArrow=classic;startArrow=none;" parent="1" source="actor_admin" target="uc1" edge="1">
@@ -95,7 +95,7 @@
                 <mxCell id="inc_uc4_uc8" value="&#10;&lt;span style=&quot;color: rgb(0, 0, 0); font-family: Helvetica; font-size: 11px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: center; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; float: none; display: inline !important;&quot;&gt;&amp;lt;&amp;lt; include &amp;gt;&amp;gt;&lt;/span&gt;&#10;&#10;" style="html=1;rounded=0;strokeWidth=1;fontSize=11;labelBackgroundColor=#ffffff;dashed=1;dashPattern=8 8;endArrow=open;endSize=12;endFill=0;startArrow=none;exitX=1;exitY=0;entryX=0.45;entryY=1.029;entryDx=0;entryDy=0;entryPerimeter=0;exitDx=0;exitDy=0;" parent="1" source="uc4" target="uc8" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="ext_uc9_uc3" value="&amp;lt;&amp;lt; extend &amp;gt;&amp;gt;" style="html=1;rounded=0;strokeWidth=1;fontSize=11;labelBackgroundColor=#ffffff;dashed=1;dashPattern=8 8;endArrow=open;endSize=12;endFill=0;startArrow=none;exitX=0.06;exitY=0.492;entryX=0.933;entryY=0.309;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="uc9" target="uc2" edge="1">
+                <mxCell id="ext_uc9_uc3" value="&amp;lt;&amp;lt; extend &amp;gt;&amp;gt;" style="html=1;rounded=0;strokeWidth=1;fontSize=11;labelBackgroundColor=#ffffff;dashed=1;dashPattern=8 8;endArrow=open;endSize=12;endFill=0;startArrow=none;entryX=0;entryY=0;entryDx=0;entryDy=0;" parent="1" source="uc9" target="uc3" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="ext_uc10_uc9" value="" style="html=1;rounded=0;strokeWidth=1;fontSize=11;labelBackgroundColor=#ffffff;dashed=1;dashPattern=8 8;endArrow=open;endSize=12;endFill=0;startArrow=none;exitX=0.5;exitY=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitDx=0;exitDy=0;" parent="1" source="uc10" target="uc7" edge="1">
@@ -104,12 +104,12 @@
                         <mxPoint as="offset"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="5" value="&amp;lt;&amp;lt; extend &amp;gt;&amp;gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="ext_uc10_uc9">
+                <mxCell id="5" value="&amp;lt;&amp;lt; extend &amp;gt;&amp;gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="ext_uc10_uc9" vertex="1" connectable="0">
                     <mxGeometry x="0.1324" y="6" relative="1" as="geometry">
                         <mxPoint as="offset"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="uc8" value="UC8&lt;br&gt;코멘트 추가&amp;nbsp;(include)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+                <mxCell id="uc8" value="UC8&lt;br&gt;코멘트 추가&amp;nbsp;(include)" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
                     <mxGeometry x="880" y="186" width="180" height="64" as="geometry"/>
                 </mxCell>
             </root>

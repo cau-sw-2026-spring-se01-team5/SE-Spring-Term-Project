@@ -1,0 +1,31 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="페이지-1" id="GCNpgWzRUKjj9peP-t2a">
+    <mxGraphModel dx="1136" dy="698" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="CCePGs1yGKBjNjLGNZ3i-1" parent="1" style="html=1;whiteSpace=wrap;" value="«interface»&lt;br&gt;UserRepository" vertex="1">
+          <mxGeometry height="50" width="110" x="359" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="CCePGs1yGKBjNjLGNZ3i-7" edge="1" parent="1" source="CCePGs1yGKBjNjLGNZ3i-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;startSize=6;endSize=15;endArrow=block;endFill=0;dashed=1;dashPattern=8 8;" target="CCePGs1yGKBjNjLGNZ3i-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="CCePGs1yGKBjNjLGNZ3i-2" parent="1" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" value="SqliteUseRepository" vertex="1">
+          <mxGeometry height="52" width="166" x="331" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="CCePGs1yGKBjNjLGNZ3i-3" parent="CCePGs1yGKBjNjLGNZ3i-2" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="- connection: Connection" vertex="1">
+          <mxGeometry height="26" width="166" y="26" as="geometry" />
+        </mxCell>
+        <mxCell id="CCePGs1yGKBjNjLGNZ3i-15" edge="1" parent="1" source="CCePGs1yGKBjNjLGNZ3i-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endSize=15;endArrow=block;endFill=1;" target="CCePGs1yGKBjNjLGNZ3i-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="CCePGs1yGKBjNjLGNZ3i-8" parent="1" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" value="UserImpl" vertex="1">
+          <mxGeometry height="52" width="170" x="130" y="239" as="geometry" />
+        </mxCell>
+        <mxCell id="CCePGs1yGKBjNjLGNZ3i-9" parent="CCePGs1yGKBjNjLGNZ3i-8" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" value="- repository : UserRepository" vertex="1">
+          <mxGeometry height="26" width="170" y="26" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

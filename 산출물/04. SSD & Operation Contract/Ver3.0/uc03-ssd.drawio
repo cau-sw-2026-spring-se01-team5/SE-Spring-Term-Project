@@ -1,0 +1,112 @@
+<mxfile host="Electron">
+  <diagram id="uc03-ssd" name="UC03 SSD">
+    <mxGraphModel dx="943" dy="561" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="la" parent="1" style="shape=line;dashed=1;dashPattern=6 6;" value="" vertex="1">
+          <mxGeometry height="740" width="1" x="170" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="lu" parent="1" style="shape=line;dashed=1;dashPattern=6 6;" value="" vertex="1">
+          <mxGeometry height="740" width="1" x="500" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="lc" parent="1" style="shape=line;dashed=1;dashPattern=6 6;" value="" vertex="1">
+          <mxGeometry height="740" width="1" x="845" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="li" parent="1" style="shape=line;dashed=1;dashPattern=6 6;" value="" vertex="1">
+          <mxGeometry height="740" width="1" x="1160" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="2" parent="1" style="shape=line;dashed=1;dashPattern=6 6;" value="" vertex="1">
+          <mxGeometry height="740" width="1" x="185" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="3" parent="1" style="shape=line;dashed=1;dashPattern=6 6;" value="" vertex="1">
+          <mxGeometry height="740" width="1" x="505" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="4" parent="1" style="shape=line;dashed=1;dashPattern=6 6;" value="" vertex="1">
+          <mxGeometry height="740" width="1" x="835" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="5" parent="1" style="shape=line;dashed=1;dashPattern=6 6;" value="" vertex="1">
+          <mxGeometry height="740" width="1" x="1160" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="6" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;" value="&lt;span style=&quot;&quot;&gt;:System&lt;/span&gt;" vertex="1">
+          <mxGeometry height="580" width="120" x="341" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="7" edge="1" parent="6" style="endArrow=block;html=1;" target="6" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="-174" y="101" as="sourcePoint" />
+            <mxPoint x="52" y="101" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IMXMu_14zOSUNtsvhPsA-93" connectable="0" parent="7" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="getIssueList(projectID, status)" vertex="1">
+          <mxGeometry relative="1" x="-0.0521" as="geometry">
+            <mxPoint y="-17" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="10" parent="1" style="shape=line;dashed=1;dashPattern=6 6;" value="" vertex="1">
+          <mxGeometry height="740" width="1" x="195" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="11" parent="1" style="shape=line;dashed=1;dashPattern=6 6;" value="" vertex="1">
+          <mxGeometry height="740" width="1" x="525" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="12" parent="1" style="shape=line;dashed=1;dashPattern=6 6;" value="" vertex="1">
+          <mxGeometry height="740" width="1" x="875" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="13" edge="1" parent="1" style="endArrow=block;html=1;" value="assignIssue(issueID, assigneeID)">
+          <mxGeometry relative="1" x="-0.0277" y="13" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="166" y="519" as="sourcePoint" />
+            <mxPoint x="400.5" y="519" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="14" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;" value="issueID">
+          <mxGeometry relative="1" x="0.0435" y="-10" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="400" y="561" as="sourcePoint" />
+            <mxPoint x="164" y="561" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="15" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" value=":PL" vertex="1">
+          <mxGeometry height="60" width="30" x="150" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="16" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeWidth=1;entryX=0.2;entryY=0.325;entryDx=0;entryDy=0;entryPerimeter=0;startArrow=none;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="164.99051010587095" y="749" as="sourcePoint" />
+            <mxPoint x="164.65999999999985" y="244" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="90" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;width=320;height=30;boundedLbl=1;verticalAlign=middle;align=left;spacingLeft=5;strokeColor=#000000;strokeWidth=1;fillColor=default;" value="&lt;span style=&quot;&quot;&gt;&lt;b&gt;opt&lt;/b&gt; [담당자 추천이 필요하면]&lt;/span&gt;" vertex="1">
+          <mxGeometry height="160" width="360" x="113" y="315" as="geometry" />
+        </mxCell>
+        <mxCell id="91" edge="1" parent="1" style="endArrow=block;html=1;" target="6" value="recommendAssignee(issueId, projectId)">
+          <mxGeometry relative="1" x="0.0476" y="10" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="164" y="384" as="sourcePoint" />
+            <mxPoint x="374" y="384" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="92" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;" value="candidates">
+          <mxGeometry relative="1" x="-0.0526" y="-10" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="400" y="439" as="sourcePoint" />
+            <mxPoint x="164" y="439" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IMXMu_14zOSUNtsvhPsA-94" edge="1" parent="1" style="endArrow=block;html=1;" value="addIssueComment(issueID,&amp;nbsp;&lt;div&gt;authorID, comment)&lt;/div&gt;">
+          <mxGeometry relative="1" x="-0.0192" y="20" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="165" y="626" as="sourcePoint" />
+            <mxPoint x="399.5" y="626" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="IMXMu_14zOSUNtsvhPsA-96" edge="1" parent="1" style="endArrow=block;endFill=1;html=1;" value="commentID">
+          <mxGeometry relative="1" x="0.0435" y="-10" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="401" y="670" as="sourcePoint" />
+            <mxPoint x="165" y="670" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
