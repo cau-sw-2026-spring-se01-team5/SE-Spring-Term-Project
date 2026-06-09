@@ -1,7 +1,7 @@
 # SE-Spring-Term-Project
 
-# 프로젝트 소개 동영상 링크
-https://youtu.be/cedBdXB4UUE
+## 프로젝트 소개 동영상 링크
+https://youtu.be/Ws5Um63dYjI
 
 ## 팀원
 
