@@ -127,6 +127,3 @@ gradle-app.setting
 .classpath
 
 /test.db
-
-# Presentation videos
-*.mp4
