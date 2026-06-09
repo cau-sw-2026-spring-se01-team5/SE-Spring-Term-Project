@@ -1,6 +1,7 @@
 # SE-Spring-Term-Project
 
-CAU 2026-1 Software Engineering Team 5 Project
+# 프로젝트 소개 동영상 링크
+https://youtu.be/cedBdXB4UUE
 
 ## 팀원
 
